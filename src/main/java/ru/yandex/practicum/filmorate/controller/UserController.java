@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,8 +20,7 @@ public class UserController {
 
     @GetMapping("/users")
     public List<User> getUsers() {    // возвращает список всех пользователей на GET запрос
-        System.out.println("users.values().stream().toList() " + users.values().stream().toList());
-        return users.values().stream().toList();
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping(value = "/users")

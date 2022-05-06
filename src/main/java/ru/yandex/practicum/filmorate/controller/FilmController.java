@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> getFilms() {    // возвращает список всех фильмов в ответ на GET запрос
-        return films.values().stream().toList();
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping(value = "/films")
