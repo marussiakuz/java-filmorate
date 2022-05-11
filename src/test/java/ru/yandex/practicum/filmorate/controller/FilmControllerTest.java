@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmManagerService;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.liquibase.enabled=false",
         "spring.flyway.enabled=false"
 })
+
 @AutoConfigureMockMvc
 class FilmControllerTest {
 
@@ -30,6 +33,9 @@ class FilmControllerTest {
 
     @Autowired
     private FilmController filmController;
+
+    @Autowired
+    private FilmManagerService filmManagerService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -108,7 +114,7 @@ class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
 
-        Film updatedFilm = filmController.getFilm(1);
+        Film updatedFilm = filmManagerService.get(1);
         assertThat(updatedFilm.getDescription()).isEqualTo("thriller");
     }
 

@@ -1,75 +1,60 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.*;
-import ru.yandex.practicum.filmorate.model.User;
+import javax.validation.Valid;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserManagerService;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
-public class UserController {
+public class UserController extends AbstractController<User>{
+    private final UserManagerService userManagerService;
 
-    private final HashMap<Integer, User> users = new HashMap<>();
+    @Autowired
+    public UserController(UserManagerService userManagerService) {
+        this.userManagerService = userManagerService;
+    }
 
     @GetMapping("/users")
-    public List<User> getUsers() {    // возвращает список всех пользователей на GET запрос
-        return new ArrayList<>(users.values());
+    public List<User> get() {    // возвращает список всех пользователей на GET запрос
+        return userManagerService.get();
     }
 
     @PostMapping(value = "/users")
-    public User addUser(@RequestBody User user) {    // добавляет нового пользователя в ответ на POST запрос
-        try {
-            checkTheUserDataForCorrectness(user);
-        } catch (IncorrectUserDataException e) {
-            log.debug("adding a user failed with the following error: {}", e.getMessage());
-            throw new IncorrectUserDataException(e.getMessage());
-        }
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+    public User add(@Valid @RequestBody User user) {    // добавляет нового пользователя в ответ на POST запрос
+        userManagerService.add(checkName(user));
         log.debug("new user added successfully");
-        users.put(user.getId(), user);
         return user;
     }
 
     @PutMapping(value = "/users")
-    public void updateUser(@RequestBody User user) {    // обновляет данные пользователя в ответ на PUT запрос
-        try {
-            checkTheUserDataForCorrectness(user);
-        } catch (IncorrectUserDataException e) {
-            log.debug("updating a user failed with the following error: {}", e.getMessage());
-            throw new IncorrectUserDataException(e.getMessage());
-        }
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+    public void update(@Valid @RequestBody User user) {    // обновляет данные пользователя в ответ на PUT запрос
+        userManagerService.add(checkName(user));
         log.debug("user data has been successfully updated");
-        users.put(user.getId(), user);
     }
 
-    private void checkTheUserDataForCorrectness (User user) {    // проверяет соответствие данных пользователя правилам
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw new InvalidEmailException("email was entered incorrectly");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new InvalidLoginException("the login was entered incorrectly");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new BirthdayInTheFutureException("birthday can't be in the future");
-        }
+    private User checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
+        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+        return user;
     }
 
-    @ExceptionHandler(IncorrectUserDataException.class)    // ловит исключения и отправляет код 400
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handle(IncorrectUserDataException e) {
-        return new ResponseEntity<>("some user data is incorrect: " + e.getMessage(),
+    @Override
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handle(MethodArgumentNotValidException e) {
+        Optional<FieldError> fieldError = Optional.ofNullable(e.getFieldError());
+        String message = fieldError.isPresent()? fieldError.get().getDefaultMessage() : "unknown error";
+        log.debug("User validation failed: " + message);
+        return new ResponseEntity<>("Some user data is incorrect: " + message,
                 HttpStatus.BAD_REQUEST);
-    }
-
-    public User getUser(int id) {    // возвращает пользователя из списка по id
-        return users.get(id);
     }
 }
