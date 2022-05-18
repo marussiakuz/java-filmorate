@@ -34,7 +34,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(int userId) {
-        System.out.println("!doesUserExist(userId)" + !doesUserExist(userId));
         if (!doesUserExist(userId)) throw new UserNotFoundException();
         return users.get(userId);
     }

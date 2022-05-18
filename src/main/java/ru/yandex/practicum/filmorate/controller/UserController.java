@@ -37,7 +37,7 @@ public class UserController extends AbstractController<User>{
 
     @PutMapping(value = "/users")
     public User update(@Valid @RequestBody User user) {    // обновляет данные пользователя в ответ на PUT запрос
-        userStorage.add(user);
+        userStorage.update(user);
         log.debug("user data has been successfully updated");
         return user;
     }
