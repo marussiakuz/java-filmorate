@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmManagerService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -35,7 +35,7 @@ class FilmControllerTest {
     private FilmController filmController;
 
     @Autowired
-    private FilmManagerService filmManagerService;
+    private FilmStorage filmStorage;
 
     @Autowired
     private ObjectMapper mapper;
@@ -114,7 +114,7 @@ class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
 
-        Film updatedFilm = filmManagerService.get(1);
+        Film updatedFilm = filmStorage.getFilmById(1);
         assertThat(updatedFilm.getDescription()).isEqualTo("thriller");
     }
 

@@ -2,54 +2,65 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.util.List;
-import java.util.Optional;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmManagerService;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 @RestController
 @Slf4j
 public class FilmController extends AbstractController<Film> {
-    private final FilmManagerService filmManagerService;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmManagerService filmManagerService) {
-        this.filmManagerService = filmManagerService;
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
     }
 
     @GetMapping("/films")
-    public List<Film> get() {    // возвращает список всех фильмов в ответ на GET запрос
-        return filmManagerService.get();
+    public List<Film> getAll() {    // возвращает список всех фильмов в ответ на GET запрос
+        return filmStorage.getAllFilms();
     }
 
     @PostMapping(value = "/films")
     public Film add(@Valid @RequestBody Film film) {    // добавляет  в список новый фильм в ответ на POST запрос
+        filmStorage.add(film);
         log.debug("new film added successfully");
-        filmManagerService.add(film);
         return film;
     }
 
     @PutMapping(value = "/films")
-    public void update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
+    public Film update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
+        filmStorage.update(film);
         log.debug("film data has been successfully updated");
-        filmManagerService.update(film);
+        return film;
     }
 
-    @Override
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handle(MethodArgumentNotValidException e) {
-        Optional<FieldError> fieldError = Optional.ofNullable(e.getFieldError());
-        String message = fieldError.isPresent()? fieldError.get().getDefaultMessage() : "unknown error";
-        if (fieldError.isPresent()) log.debug("Film validation failed: " + message);
-        return new ResponseEntity<>("Some film data is incorrect: " + e.getFieldError().getDefaultMessage(),
-                HttpStatus.BAD_REQUEST);
+    @GetMapping(value = "/films/{id}")
+    public Film getById(@PathVariable(value = "id") Integer filmId) {
+        return filmStorage.getFilmById(filmId);
+    }
+
+    @PutMapping(value = "/films/{id}/like/{userId}")
+    public void addLike(@PathVariable(value = "id") Integer filmId, @PathVariable Integer userId) {
+        filmService.addLike(filmId, userId);
+        log.debug("like has been successfully added");
+    }
+
+    @DeleteMapping(value = "/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable(value = "id") Integer filmId, @PathVariable Integer userId) {
+        filmService.deleteLike(filmId, userId);
+        log.debug("like has been successfully deleted");
+    }
+
+    @GetMapping(value = "/films/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        return filmService.getMostPopularFilms(count);
     }
 }
