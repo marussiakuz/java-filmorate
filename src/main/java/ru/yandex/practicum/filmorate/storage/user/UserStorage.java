@@ -13,5 +13,5 @@ public interface UserStorage {    // управление списком пол�
     public void add(User user);
     public void update(User user);
     public User getUserById(int id);
-    public boolean doesUserExist(Integer userId);
+    public boolean doesUserExist(int userId);
 }

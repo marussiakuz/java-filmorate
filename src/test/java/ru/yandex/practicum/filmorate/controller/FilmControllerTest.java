@@ -102,7 +102,7 @@ class FilmControllerTest {
 
     @Test
     void updateValidFilmIsOk() throws Exception {
-        film.setId(1);
+        film.setId(60);
         mockMvc.perform(post("/films")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(film)))
@@ -114,7 +114,7 @@ class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
 
-        Film updatedFilm = filmStorage.getFilmById(1);
+        Film updatedFilm = filmStorage.getFilmById(60);
         assertThat(updatedFilm.getDescription()).isEqualTo("thriller");
     }
 

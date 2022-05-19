@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -20,31 +19,23 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void add(User user) {
-        checkName(user);
         checkId(user);
         users.put(user.getId(), user);
     }
 
     @Override
     public void update(User user) {
-        if (!doesUserExist(user.getId())) throw new UserNotFoundException();
-        checkName(user);
         users.put(user.getId(), user);
     }
 
     @Override
     public User getUserById(int userId) {
-        if (!doesUserExist(userId)) throw new UserNotFoundException();
         return users.get(userId);
     }
 
     @Override
-    public boolean doesUserExist(Integer userId) {
+    public boolean doesUserExist(int userId) {
         return users.containsKey(userId);
-    }
-
-    private void checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
     }
 
     private void checkId(User user) {

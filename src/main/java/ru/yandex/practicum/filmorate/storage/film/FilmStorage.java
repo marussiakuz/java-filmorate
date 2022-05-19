@@ -12,4 +12,5 @@ public interface FilmStorage {    // управление списком фил�
     public void add(Film film);
     public void update(Film film);
     public Film getFilmById(int id);
+    public boolean doesFilmExist(int id);
 }
