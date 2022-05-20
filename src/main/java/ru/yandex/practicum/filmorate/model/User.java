@@ -10,6 +10,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Getter
 @Setter
@@ -18,14 +20,13 @@ import java.time.LocalDate;
 public class User {
 
     private int id;
-
     private String name;
+    private final Set<Integer> friends = new TreeSet<>();
 
     @NotNull(message = "Email may not be null")
     @NotBlank(message = "Email may not be blank")
     @Email(message = "The email is incorrect")
     private String email;
-
 
     @NotNull(message = "Login may not be null")
     @NotBlank(message = "Login may not be blank")
@@ -33,11 +34,19 @@ public class User {
     private String login;
 
     @Past(message = "Birthday may not be in the future")
-    private LocalDate birthday;
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    public LocalDate getBirthday() {
-        return birthday;
+    private LocalDate birthday;
+
+    public void addFriend(Integer friendId) {
+        friends.add(friendId);
+    }
+
+    public void deleteFriend(Integer friendId) {
+        friends.remove(friendId);
+    }
+
+    public Set<Integer> getFriends() {
+        return friends;
     }
 }

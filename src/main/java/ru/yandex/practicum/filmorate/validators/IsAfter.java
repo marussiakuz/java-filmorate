@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = DateValidator.class)
 @Documented
-public @interface IsAfter{    // интерфейс аннотация для проверки даты
+public @interface IsAfter {    // интерфейс аннотация для проверки даты
     String message() default "The date is incorrect";
     String current();
     Class<?>[] groups() default {};

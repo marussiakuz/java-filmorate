@@ -1,60 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserManagerService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@Slf4j
+@RequestMapping("/users")
 public class UserController extends AbstractController<User>{
-    private final UserManagerService userManagerService;
+    private final UserService userService;
 
-    @Autowired
-    public UserController(UserManagerService userManagerService) {
-        this.userManagerService = userManagerService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @GetMapping("/users")
-    public List<User> get() {    // возвращает список всех пользователей на GET запрос
-        return userManagerService.get();
+    @GetMapping
+    public List<User> getAll() {    // возвращает список всех пользователей на GET запрос
+        return userService.getAllUsers();
     }
 
-    @PostMapping(value = "/users")
+    @PostMapping
     public User add(@Valid @RequestBody User user) {    // добавляет нового пользователя в ответ на POST запрос
-        userManagerService.add(checkName(user));
-        log.debug("new user added successfully");
-        return user;
+        return userService.add(user);
     }
 
-    @PutMapping(value = "/users")
-    public void update(@Valid @RequestBody User user) {    // обновляет данные пользователя в ответ на PUT запрос
-        userManagerService.add(checkName(user));
-        log.debug("user data has been successfully updated");
+    @PutMapping
+    public User update(@Valid @RequestBody User user) {    // обновляет данные пользователя в ответ на PUT запрос
+        return userService.update(user);
     }
 
-    private User checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
-        return user;
+    @GetMapping(value = "/{id}")
+    public User getById(@PathVariable Integer id) {
+        return userService.getUserById(id);
     }
 
-    @Override
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handle(MethodArgumentNotValidException e) {
-        Optional<FieldError> fieldError = Optional.ofNullable(e.getFieldError());
-        String message = fieldError.isPresent()? fieldError.get().getDefaultMessage() : "unknown error";
-        log.debug("User validation failed: " + message);
-        return new ResponseEntity<>("Some user data is incorrect: " + message,
-                HttpStatus.BAD_REQUEST);
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable(value = "id") Integer userId, @PathVariable Integer friendId) {
+        userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable(value = "id") Integer userId, @PathVariable Integer friendId) {
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping(value = "/{id}/friends")
+    public List<User> getAllFriends(@PathVariable(value = "id") Integer userId) {
+        return userService.getAllFriends(userId);
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable(value = "id") Integer userId, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(userId, otherId);
     }
 }

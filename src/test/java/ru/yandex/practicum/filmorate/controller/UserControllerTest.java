@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserManagerService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.liquibase.enabled=false",
         "spring.flyway.enabled=false"
 })
+
 @AutoConfigureMockMvc
 class UserControllerTest {
 
@@ -32,7 +33,7 @@ class UserControllerTest {
     private UserController userController;
 
     @Autowired
-    private UserManagerService userManagerService;
+    private UserStorage userStorage;
 
     @Autowired
     private ObjectMapper mapper;
@@ -71,7 +72,7 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User updatedUser = userManagerService.get(66);
+        User updatedUser = userStorage.getUserById(66);
         assertThat(updatedUser.getName()).isEqualTo(user.getLogin());
     }
 
@@ -133,7 +134,7 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User updatedUser = userManagerService.get(15);
+        User updatedUser = userStorage.getUserById(15);
         assertThat(updatedUser.getName()).isEqualTo("Name Family");
     }
 
@@ -146,7 +147,7 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User addedUser = userManagerService.get(11);
+        User addedUser = userStorage.getUserById(11);
         assertThat(addedUser.getName()).isEqualTo("Login");
     }
 
