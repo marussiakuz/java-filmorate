@@ -44,6 +44,10 @@ public class Film {
     @JsonSerialize(using = DurationSerializer.class)
     private Duration duration;
 
+    private Genre genre;
+
+    private Rating rating;
+
     public void addLike(Integer userId){
         likes.add(userId);
     }

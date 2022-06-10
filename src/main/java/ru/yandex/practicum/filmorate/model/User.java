@@ -10,8 +10,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Getter
 @Setter
@@ -21,7 +22,7 @@ public class User {
 
     private int id;
     private String name;
-    private final Set<Integer> friends = new TreeSet<>();
+    private final Map<Integer, Boolean> friends = new HashMap<>();
 
     @NotNull(message = "Email may not be null")
     @NotBlank(message = "Email may not be blank")
@@ -39,7 +40,7 @@ public class User {
     private LocalDate birthday;
 
     public void addFriend(Integer friendId) {
-        friends.add(friendId);
+        friends.put(friendId, false);
     }
 
     public void deleteFriend(Integer friendId) {
@@ -47,6 +48,6 @@ public class User {
     }
 
     public Set<Integer> getFriends() {
-        return friends;
+        return friends.keySet();
     }
 }
