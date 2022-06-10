@@ -4,4 +4,4 @@ Template repository for Filmorate project.
                                                    ** Database diagrams **
 
 
-![схемы базы данных](/Users/Marya/java-filmorate/DATABASE schemas.png)
+![схемы базы данных](https://github.com/marussiakuz/java-filmorate/blob/main/DATABASE%20schemas.png)
