@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 
 import java.util.Optional;
@@ -25,10 +26,11 @@ public class ErrorHandler {
         return new ErrorResponse("Some data is incorrect: " + e.getFieldError().getDefaultMessage());
     }
 
-    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         if (e instanceof FilmNotFoundException) return new ErrorResponse("Film not found");
+        else if (e instanceof LikeNotFoundException) return new ErrorResponse("Like not found");
         return new ErrorResponse("User not found");
     }
 

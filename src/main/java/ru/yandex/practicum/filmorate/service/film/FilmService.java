@@ -15,12 +15,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class FilmService {
+public class FilmInMemoryService {
 
     private final FilmStorage filmStorage;
+
     private final UserStorage userStorage;
 
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmInMemoryService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -44,7 +45,7 @@ public class FilmService {
         return film;
     }
 
-    public Film getFilmById(int id) {
+    public Optional<Film> getFilmById(int id) {
         validateFilm(id);
         return filmStorage.getFilmById(id);
     }
@@ -53,7 +54,7 @@ public class FilmService {
         validateFilm(filmId);
         if (!userStorage.doesUserExist(userId))
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-        filmStorage.getFilmById(filmId).addLike(userId);
+        filmStorage.getFilmById(filmId).get().addLike(userId);
         log.debug(String.format("the film with id=%s liked the user with id=%s", filmId, userId));
     }
 
@@ -61,7 +62,7 @@ public class FilmService {
         validateFilm(filmId);
         if (!userStorage.doesUserExist(userId))
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-        filmStorage.getFilmById(filmId).deleteLike(userId);
+        filmStorage.getFilmById(filmId).get().deleteLike(userId);
         log.debug(String.format("the film with id=%s disliked the user with id=%s", filmId, userId));
     }
 
