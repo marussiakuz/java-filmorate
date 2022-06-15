@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller.error;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -7,9 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 
 import java.util.Optional;
 
@@ -26,11 +24,14 @@ public class ErrorHandler {
         return new ErrorResponse("Some data is incorrect: " + e.getFieldError().getDefaultMessage());
     }
 
-    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class})
+    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class,
+            GenreNotFoundException.class, RatingNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         if (e instanceof FilmNotFoundException) return new ErrorResponse("Film not found");
         else if (e instanceof LikeNotFoundException) return new ErrorResponse("Like not found");
+        else if (e instanceof RatingNotFoundException) return new ErrorResponse("Rating not found");
+        else if (e instanceof GenreNotFoundException) return new ErrorResponse("Genre not found");
         return new ErrorResponse("User not found");
     }
 

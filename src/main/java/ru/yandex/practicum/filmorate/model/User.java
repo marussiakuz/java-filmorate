@@ -14,10 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@ToString
+@EqualsAndHashCode
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
     private int id;

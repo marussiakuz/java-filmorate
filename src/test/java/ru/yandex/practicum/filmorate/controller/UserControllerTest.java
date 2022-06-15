@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -33,7 +34,7 @@ class UserControllerTest {
     private UserController userController;
 
     @Autowired
-    private UserStorage userStorage;
+    private InMemoryUserStorage userStorage;
 
     @Autowired
     private ObjectMapper mapper;

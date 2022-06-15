@@ -1,19 +1,19 @@
 package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
-public class UserInMemoryService implements UserService {
+public class UserService {
     private final UserStorage userStorage;
 
-    public UserInMemoryService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -32,7 +32,7 @@ public class UserInMemoryService implements UserService {
         log.debug(String.format("user data with id=%s has been successfully updated", user.getId()));
         return user;
     }
-    public Optional<User> getUserById(Integer userId) {
+    public User getUserById(Integer userId) {
         return userStorage.getUserById(userId);
     }
 
