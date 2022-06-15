@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Sql({"/schema.sql", "/test-data.sql"})
 class FilmorateApplicationTests {
 	private final UserDbStorage userDbStorage;
 	private final FilmDbStorage filmDbStorage;
@@ -70,7 +73,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void getAllUsers() {
+	public void getAllUsers() {
 		List<User> users = userDbStorage.getAllUsers();
 
 		assertEquals(5, users.size());
@@ -81,7 +84,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void addAndDeleteFriend() {
+	public void addAndDeleteFriend() {
 		List<User> friends = userDbStorage.getAllFriends(3);
 
 		assertTrue(friends.isEmpty());
@@ -104,7 +107,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void getAllAndCommonFriends() {
+	public void getAllAndCommonFriends() {
 		List<User> friends = userDbStorage.getAllFriends(1);
 
 		assertTrue(friends.isEmpty());
@@ -130,7 +133,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void addUpdateGetDeleteFilm() {
+	public void addUpdateGetDeleteFilm() {
 		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 
 		Film film = Film.builder()
@@ -179,7 +182,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void getAllFilms() {
+	public void getAllFilms() {
 		List<Film> films = filmDbStorage.getAllFilms();
 
 		assertEquals(5, films.size());
@@ -190,7 +193,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void addAndDeleteLikeAndGetMostPopular() {
+	public void addAndDeleteLikeAndGetMostPopular() {
 		filmDbStorage.addLike(5, 1);
 		filmDbStorage.addLike(5, 2);
 		filmDbStorage.addLike(5, 3);
