@@ -19,13 +19,12 @@ public class RatingDbStorage implements RatingStorage {
     @Override
     public List<Rating> getAllMpa() {
         String sqlQuery = "SELECT * FROM rating";
+
         return jdbcTemplate.query(sqlQuery, this::mapRowToRating);
     }
 
     @Override
     public Rating getRatingById(int id) {
-        validateRating(id);
-
         String sqlQuery = "SELECT * FROM rating WHERE rating_id = ?";
 
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, id);
@@ -34,7 +33,9 @@ public class RatingDbStorage implements RatingStorage {
     @Override
     public boolean doesRatingExist(int id) {
         String sql = "SELECT COUNT(*) FROM rating WHERE rating_id = ?";
+
         int count = jdbcTemplate.queryForObject(sql, new Object[] { id }, Integer.class);
+
         return count > 0;
     }
 

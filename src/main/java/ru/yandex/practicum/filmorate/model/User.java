@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.validators.DoesNotContain;
 
@@ -23,7 +24,7 @@ import java.util.Set;
 @Builder
 public class User {
 
-    private int id;
+    private Integer id;
     private String name;
     private final Map<Integer, Boolean> friends = new HashMap<>();
 

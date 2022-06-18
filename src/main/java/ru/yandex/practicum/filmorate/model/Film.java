@@ -26,7 +26,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 @Builder
 public class Film {
 
-    private int id;
+    private Integer id;
     private final Set<Integer> likes = new TreeSet<>();
 
     @NotNull(message = "Title may not be null")

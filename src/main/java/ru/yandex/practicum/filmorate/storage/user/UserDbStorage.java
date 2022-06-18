@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
@@ -23,13 +24,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         String sqlQuery = "SELECT * FROM users";
+
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     @Override
     public void add(User user) {
-        checkName(user);
-
         String sqlQuery = "INSERT INTO users(name, email, login, birthday) VALUES (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -47,12 +47,10 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void update(User user) {
-        validate(user.getId());
-        checkName(user);
-
         String sqlQuery = "UPDATE users SET name = ?, email = ?, login = ?, birthday = ? WHERE user_id = ?";
+
         jdbcTemplate.update(sqlQuery,
-                user.getName(),
+                user.getName() == null || user.getName().isBlank() ? user.getLogin() : user.getName(),
                 user.getEmail(),
                 user.getLogin(),
                 java.sql.Date.valueOf(user.getBirthday()),
@@ -60,24 +58,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(int id) {
-        validate(id);
-
+    public Optional<User> getUserById(int id) {
         String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
 
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
-    }
-
-    public boolean delete(long id) {
-        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
-        return jdbcTemplate.update(sqlQuery, id) > 0;
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id));
     }
 
     @Override
     public void addFriend(int userId, int friendId) {
-        validate(userId);
-        validate(friendId);
-
         String sqlQuery = "INSERT INTO friendship (user_id, friend_id, is_confirmed) VALUES (?, ?, 0)";
 
         jdbcTemplate.update(sqlQuery, userId, friendId);
@@ -85,9 +73,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        validate(userId);
-        validate(friendId);
-
         String sqlQuery = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
 
         jdbcTemplate.update(sqlQuery, userId, friendId);
@@ -96,6 +81,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllFriends(int userId) {
         String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friendship WHERE user_id = ?)";
+
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
     }
 
@@ -103,6 +89,7 @@ public class UserDbStorage implements UserStorage {
     public List<User> getCommonFriends(int userId, int otherUserId) {
         String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friendship WHERE user_id = ? " +
                 "OR user_id = ? GROUP BY friend_id HAVING count(friend_id) = 2)";
+
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId, otherUserId);
     }
 
@@ -111,6 +98,15 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT COUNT(*) FROM users WHERE user_id = ?";
 
         int count = jdbcTemplate.queryForObject(sql, new Object[] { userId }, Integer.class);
+
+        return count > 0;
+    }
+
+    @Override
+    public boolean doesFriendExist(int userId, int friendId) {
+        String sql = "SELECT COUNT(*) FROM friendship WHERE user_id = ? AND friend_id = ?";
+
+        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, friendId }, Integer.class);
 
         return count > 0;
     }

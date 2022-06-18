@@ -5,16 +5,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,8 +38,9 @@ class UserControllerTest {
     @Autowired
     private UserController userController;
 
+    @Qualifier("inMemoryUserStorage")
     @Autowired
-    private InMemoryUserStorage userStorage;
+    private UserStorage userStorage;
 
     @Autowired
     private ObjectMapper mapper;
@@ -73,7 +79,12 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User updatedUser = userStorage.getUserById(66);
+        Optional<User> optionalUser = userStorage.getUserById(66);
+
+        assertTrue(optionalUser.isPresent());
+
+        User updatedUser = optionalUser.get();
+
         assertThat(updatedUser.getName()).isEqualTo(user.getLogin());
     }
 
@@ -135,7 +146,12 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User updatedUser = userStorage.getUserById(15);
+        Optional<User> optionalUser = userStorage.getUserById(15);
+
+        assertTrue(optionalUser.isPresent());
+
+        User updatedUser = optionalUser.get();
+
         assertThat(updatedUser.getName()).isEqualTo("Name Family");
     }
 
@@ -148,7 +164,12 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        User addedUser = userStorage.getUserById(11);
+        Optional<User> optionalUser = userStorage.getUserById(11);
+
+        assertTrue(optionalUser.isPresent());
+
+        User addedUser = optionalUser.get();
+
         assertThat(addedUser.getName()).isEqualTo("Login");
     }
 

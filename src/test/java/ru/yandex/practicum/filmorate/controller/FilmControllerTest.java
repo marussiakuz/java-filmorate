@@ -5,17 +5,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,8 +37,9 @@ class FilmControllerTest {
     @Autowired
     private FilmController filmController;
 
+    @Qualifier("inMemoryFilmStorage")
     @Autowired
-    private InMemoryFilmStorage filmStorage;
+    private FilmStorage filmStorage;
 
     @Autowired
     private ObjectMapper mapper;
@@ -114,7 +118,12 @@ class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
 
-        Film updatedFilm = filmStorage.getFilmById(60);
+        Optional<Film> optionalFilm = filmStorage.getFilmById(60);
+
+        assertTrue(optionalFilm.isPresent());
+
+        Film updatedFilm = optionalFilm.get();
+
         assertThat(updatedFilm.getDescription()).isEqualTo("thriller");
     }
 

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.genre;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
@@ -20,13 +19,12 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public List<Genre> getAllGenres() {
         String sqlQuery = "SELECT * FROM genre";
+
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
     @Override
     public Genre getGenreById(int id) {
-        validateGenre(id);
-
         String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
 
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
@@ -35,32 +33,10 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public boolean doesGenreExist(int id) {
         String sql = "SELECT COUNT(*) FROM genre WHERE genre_id = ?";
+
         int count = jdbcTemplate.queryForObject(sql, new Object[] { id }, Integer.class);
+
         return count > 0;
-    }
-
-    public void addGenresToTheFilm(Film film) {
-        if (film.getGenres() == null || film.getGenres().isEmpty()) return;
-
-        String sqlQuery = "INSERT INTO film_genre(film_id, genre_id) SELECT ?, ?";
-
-        film.getGenres().stream()
-                .mapToInt(Genre::getId)
-                .distinct()
-                .forEach(genreId -> jdbcTemplate.update(sqlQuery, film.getId(), genreId));
-
-        film.setGenres(getGenresByFilmId(film.getId()));
-    }
-
-    public List<Genre> getGenresByFilmId(Integer filmId) {
-        String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
-                "USING(genre_id)";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
-    }
-
-    public void deleteGenresByFilmId(Integer filmId) {
-        String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
-        jdbcTemplate.update(sqlQuery, filmId);
     }
 
     private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {

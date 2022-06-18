@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
+
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,7 +18,9 @@ import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +36,7 @@ class FilmorateApplicationTests {
 	private final JdbcTemplate jdbcTemplate;
 
 	@Test
-	public void addUpdateGetDeleteUser() {
+	public void addUpdateAndGetByIdUser() {
 		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
 
 		User user = User.builder()
@@ -59,16 +62,19 @@ class FilmorateApplicationTests {
 
 		assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
 
-		User receivedUser = userDbStorage.getUserById(user.getId());
+		Optional<User> userOptional = userDbStorage.getUserById(user.getId());
+
+		assertThat(userOptional)
+				.isPresent()
+				.hasValueSatisfying(userCheck ->
+						assertThat(userCheck).hasFieldOrPropertyWithValue("id", user.getId()));
+
+		User receivedUser = userOptional.get();
 
 		assertThat(receivedUser).hasFieldOrPropertyWithValue("name", "UpdatedLogin");
 		assertThat(receivedUser).hasFieldOrPropertyWithValue("login", "UpdatedLogin");
 		assertThat(receivedUser).hasFieldOrPropertyWithValue("email", "updatedEmail@gmail.ru");
 		assertThat(receivedUser).hasFieldOrPropertyWithValue("birthday", LocalDate.of(2022, 6, 15));
-
-		userDbStorage.delete(6);
-
-		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
 	}
 
 	@Test
@@ -79,7 +85,13 @@ class FilmorateApplicationTests {
 
 		AtomicInteger userId = new AtomicInteger(1);
 
-		users.forEach(user -> assertEquals(user, userDbStorage.getUserById(userId.getAndIncrement())));
+		users.forEach(user -> {
+			assertEquals(user, Stream.of(userDbStorage.getUserById(userId.getAndIncrement()))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
+					.findFirst()
+					.orElse(null));
+		});
 	}
 
 	@Test
@@ -128,11 +140,17 @@ class FilmorateApplicationTests {
 
 		AtomicInteger userId = new AtomicInteger(4);
 
-		commonFriends.forEach(user -> assertEquals(user, userDbStorage.getUserById(userId.getAndIncrement())));
+		commonFriends.forEach(user -> {
+			assertEquals(user, Stream.of(userDbStorage.getUserById(userId.getAndIncrement()))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
+					.findFirst()
+					.orElse(null));
+		});
 	}
 
 	@Test
-	public void addUpdateGetDeleteFilm() {
+	public void addUpdateAndGetByIdFilm() {
 		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 
 		Film film = Film.builder()
@@ -166,7 +184,14 @@ class FilmorateApplicationTests {
 
 		assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 
-		Film receivedFilm = filmDbStorage.getFilmById(film.getId());
+		Optional<Film> filmOptional = filmDbStorage.getFilmById(film.getId());
+
+		assertThat(filmOptional)
+				.isPresent()
+				.hasValueSatisfying(filmCheck ->
+						assertThat(filmCheck).hasFieldOrPropertyWithValue("id", film.getId()));
+
+		Film receivedFilm = filmOptional.get();
 
 		assertThat(receivedFilm).hasFieldOrPropertyWithValue("name", "Another");
 		assertThat(receivedFilm).hasFieldOrPropertyWithValue("description", "very strange.. ");
@@ -174,10 +199,6 @@ class FilmorateApplicationTests {
 		assertThat(receivedFilm).hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2022, 6, 3));
 		assertThat(receivedFilm.getMpa()).hasFieldOrPropertyWithValue("id", 5);
 		assertThat(receivedFilm.getMpa().getName()).isEqualTo("NC-17");
-
-		filmDbStorage.delete(6);
-
-		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 	}
 
 	@Test
@@ -188,7 +209,13 @@ class FilmorateApplicationTests {
 
 		AtomicInteger filmId = new AtomicInteger(1);
 
-		films.forEach(film -> assertEquals(film, filmDbStorage.getFilmById(filmId.getAndIncrement())));
+		films.forEach(film -> {
+			assertEquals(film, Stream.of(filmDbStorage.getFilmById(filmId.getAndIncrement()))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
+					.findFirst()
+					.orElse(null));
+		});
 	}
 
 	@Test
@@ -214,9 +241,10 @@ class FilmorateApplicationTests {
 		List<Film> popular = filmDbStorage.getMostPopularFilms(3);
 
 		assertEquals(3, popular.size());
-		assertEquals(filmDbStorage.getFilmById(5), popular.get(0));
-		assertEquals(filmDbStorage.getFilmById(4), popular.get(1));
-		assertEquals(filmDbStorage.getFilmById(3), popular.get(2));
+
+		assertEquals(filmDbStorage.getFilmById(5).get(), popular.get(0));
+		assertEquals(filmDbStorage.getFilmById(4).get(), popular.get(1));
+		assertEquals(filmDbStorage.getFilmById(3).get(), popular.get(2));
 
 		filmDbStorage.deleteLike(5, 1);
 		filmDbStorage.deleteLike(5, 2);
@@ -225,7 +253,7 @@ class FilmorateApplicationTests {
 		popular = filmDbStorage.getMostPopularFilms(2);
 
 		assertEquals(2, popular.size());
-		assertEquals(filmDbStorage.getFilmById(4), popular.get(0));
-		assertEquals(filmDbStorage.getFilmById(3), popular.get(1));
+		assertEquals(filmDbStorage.getFilmById(4).get(), popular.get(0));
+		assertEquals(filmDbStorage.getFilmById(3).get(), popular.get(1));
 	}
 }

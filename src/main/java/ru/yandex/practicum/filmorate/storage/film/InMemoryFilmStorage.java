@@ -1,22 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
-    private final HashMap<Integer, Film> films = new HashMap<>();
-    private final InMemoryUserStorage inMemoryUserStorage;
 
-    public InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-    }
+    private final HashMap<Integer, Film> films = new HashMap<>();
 
     @Override
     public List<Film> getAllFilms() {
@@ -25,42 +19,36 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void add(Film film) {
-        if (doesFilmExist(film.getId()))
-            throw new FilmAlreadyExistException(String.format("Film with id=%s already exists", film.getId()));
-        checkId(film);
+        if (film.getId() == null || film.getId() == 0) {
+            if (films.isEmpty()) film.setId(1);
+            else {
+                int maxId = films.keySet().stream().max(Comparator.naturalOrder()).get();
+                film.setId(++maxId);
+            }
+        }
         films.put(film.getId(), film);
     }
 
     @Override
     public void update(Film film) {
-        validateFilm(film.getId());
         films.put(film.getId(), film);
     }
 
     @Override
-    public Film getFilmById(int id) {
-        validateFilm(id);
-        return films.get(id);
+    public Optional<Film> getFilmById(int id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-        validateFilm(filmId);
-
-        if (!inMemoryUserStorage.doesUserExist(userId))
-            throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-
-        getFilmById(filmId).addLike(userId);
+        Optional<Film> filmOptional = getFilmById(filmId);
+        filmOptional.ifPresent(film -> film.addLike(userId));
     }
 
     @Override
     public void deleteLike(int filmId, int userId) {
-        validateFilm(filmId);
-
-        if (!inMemoryUserStorage.doesUserExist(userId))
-            throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-
-        getFilmById(filmId).deleteLike(userId);
+        Optional<Film> filmOptional = getFilmById(filmId);
+        filmOptional.ifPresent(film -> film.deleteLike(userId));
     }
 
     @Override
@@ -76,13 +64,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.containsKey(filmId);
     }
 
-    private void checkId(Film film) {
-        if (film.getId() == 0) {
-            if (films.isEmpty()) film.setId(1);
-            else {
-                int maxId = films.keySet().stream().max(Comparator.naturalOrder()).get();
-                film.setId(++maxId);
-            }
-        }
+    @Override
+    public boolean doesLikeExist(int filmId, int userId) {
+        if (!doesFilmExist(filmId) || getFilmById(filmId).isEmpty()) return false;
+        Film film = getFilmById(filmId).get();
+        return film.getLikes().contains(userId);
     }
 }
