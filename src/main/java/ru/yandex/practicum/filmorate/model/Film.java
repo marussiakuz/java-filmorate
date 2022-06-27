@@ -11,22 +11,26 @@ import ru.yandex.practicum.filmorate.validators.IsAfter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 
+@ToString
+@EqualsAndHashCode
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Film {
 
-    private int id;
+    private Integer id;
     private final Set<Integer> likes = new TreeSet<>();
 
-    @NotNull(message = "Name may not be null")
-    @NotBlank(message = "Name may not be blank")
+    @NotNull(message = "Title may not be null")
+    @NotBlank(message = "Title may not be blank")
     private String name;
 
     @NotNull(message = "Description may not be null")
@@ -44,9 +48,8 @@ public class Film {
     @JsonSerialize(using = DurationSerializer.class)
     private Duration duration;
 
-    private Genre genre;
-
-    private Rating rating;
+    private Rating mpa;
+    private List<Genre> genres;
 
     public void addLike(Integer userId){
         likes.add(userId);

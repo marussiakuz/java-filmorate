@@ -3,12 +3,10 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Integer, User> users = new HashMap<>();
 
@@ -19,7 +17,14 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void add(User user) {
-        checkId(user);
+        if (user.getId() == null || user.getId() == 0) {
+            if (users.isEmpty()) user.setId(1);
+            else {
+                int maxId = users.keySet().stream().max(Comparator.naturalOrder()).get();
+                user.setId(++maxId);
+            }
+
+        }
         users.put(user.getId(), user);
     }
 
@@ -29,8 +34,32 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(int userId) {
-        return users.get(userId);
+    public Optional<User> getUserById(int userId) {
+        return Optional.ofNullable(users.get(userId));
+    }
+
+    @Override
+    public void addFriend(int userId, int friendId) {
+        users.get(userId).addFriend(friendId);
+        users.get(friendId).addFriend(userId);
+    }
+
+    @Override
+    public void deleteFriend(int userId, int friendId) {
+        users.get(userId).deleteFriend(friendId);
+        users.get(friendId).deleteFriend(userId);
+    }
+
+    @Override
+    public List<User> getAllFriends(int userId) {
+        return users.get(userId).getFriends().stream().map(users::get).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getCommonFriends(int userId, int otherUserId) {
+        List<Integer> friends = new ArrayList<>(users.get(userId).getFriends());
+        friends.retainAll(users.get(otherUserId).getFriends());
+        return friends.stream().map(users::get).collect(Collectors.toList());
     }
 
     @Override
@@ -38,14 +67,8 @@ public class InMemoryUserStorage implements UserStorage {
         return users.containsKey(userId);
     }
 
-    private void checkId(User user) {
-        if (user.getId() == 0) {
-            if (users.isEmpty()) user.setId(1);
-            else {
-                int maxId = users.keySet().stream().max(Comparator.naturalOrder()).get();
-                user.setId(++maxId);
-            }
-
-        }
+    @Override
+    public boolean doesFriendExist(int userId, int friendId) {
+        return users.get(userId).getFriends().contains(friendId);
     }
 }

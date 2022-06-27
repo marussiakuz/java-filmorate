@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
+
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
+
     private final HashMap<Integer, Film> films = new HashMap<>();
 
     @Override
@@ -19,7 +19,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void add(Film film) {
-        checkId(film);
+        if (film.getId() == null || film.getId() == 0) {
+            if (films.isEmpty()) film.setId(1);
+            else {
+                int maxId = films.keySet().stream().max(Comparator.naturalOrder()).get();
+                film.setId(++maxId);
+            }
+        }
         films.put(film.getId(), film);
     }
 
@@ -29,8 +35,28 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(int id) {
-        return films.get(id);
+    public Optional<Film> getFilmById(int id) {
+        return Optional.ofNullable(films.get(id));
+    }
+
+    @Override
+    public void addLike(int filmId, int userId) {
+        Optional<Film> filmOptional = getFilmById(filmId);
+        filmOptional.ifPresent(film -> film.addLike(userId));
+    }
+
+    @Override
+    public void deleteLike(int filmId, int userId) {
+        Optional<Film> filmOptional = getFilmById(filmId);
+        filmOptional.ifPresent(film -> film.deleteLike(userId));
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        return getAllFilms().stream()
+                .sorted(Comparator.comparing(Film::getCountOfLikes).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -38,13 +64,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.containsKey(filmId);
     }
 
-    private void checkId(Film film) {
-        if (film.getId() == 0) {
-            if (films.isEmpty()) film.setId(1);
-            else {
-                int maxId = films.keySet().stream().max(Comparator.naturalOrder()).get();
-                film.setId(++maxId);
-            }
-        }
+    @Override
+    public boolean doesLikeExist(int filmId, int userId) {
+        if (!doesFilmExist(filmId) || getFilmById(filmId).isEmpty()) return false;
+        Film film = getFilmById(filmId).get();
+        return film.getLikes().contains(userId);
     }
 }
