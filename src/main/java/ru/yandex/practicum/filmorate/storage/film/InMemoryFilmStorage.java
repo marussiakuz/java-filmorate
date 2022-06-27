@@ -60,6 +60,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(int user_id, int friend_id) {
+        return null;
+    }
+
+    @Override
     public boolean doesFilmExist(int filmId) {
         return films.containsKey(filmId);
     }

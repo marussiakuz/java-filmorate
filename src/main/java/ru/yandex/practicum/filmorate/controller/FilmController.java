@@ -51,4 +51,8 @@ public class FilmController extends AbstractController<Film> {
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getMostPopularFilms(count);
     }
+    @GetMapping(value = "/common")
+    public List<Film> getPopularFilms(@RequestParam Integer userId, Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }

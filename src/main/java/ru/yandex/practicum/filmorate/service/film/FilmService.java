@@ -89,4 +89,8 @@ public class FilmService {
             throw new LikeNotFoundException(String.format("Film with id=%s was not liked by a user with id=%s",
                     filmId, userId));
     }
+
+    public List<Film> getCommonFilms(int userId, int friendId){
+        return  filmStorage.getCommonFilms(userId, friendId);
+    }
 }

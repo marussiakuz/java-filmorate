@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -16,6 +15,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -52,7 +52,8 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
-        if (film.getGenres() != null) addGenresToTheFilm(film);
+        if (film.getGenres() != null)
+            addGenresToTheFilm(film);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
-            film.setGenres(genres.isEmpty()? null : genres);
+            film.setGenres(genres.isEmpty() ? null : genres);
         }
 
         return Optional.ofNullable(film);
@@ -116,10 +117,24 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(int user_id, int friend_id) {
+
+            String sqlQuery = "SELECT * FROM film LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
+                    "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT " +
+                    "JOIN  likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
+                    "WHERE l1.user_id = ? AND l2.user_id = ? ORDER BY count_like DESC";
+
+                List<Film> commonFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, user_id, friend_id);
+             commonFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+
+        return commonFilms;
+    }
+
+    @Override
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
 
         return count > 0;
     }
@@ -128,12 +143,12 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesLikeExist(int filmId, int userId) {
         String sql = "SELECT COUNT(*) FROM likes WHERE user_id = ? AND film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, filmId}, Integer.class);
 
         return count > 0;
     }
 
-    private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -148,7 +163,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))
@@ -163,7 +178,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void addGenresToTheFilm(Film film) {
-        if (film.getGenres() == null || film.getGenres().isEmpty()) return;
+        if (film.getGenres() == null || film.getGenres().isEmpty())
+            return;
 
         String sqlQuery = "INSERT INTO film_genre(film_id, genre_id) SELECT ?, ?";
 
