@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -20,11 +21,14 @@ import java.util.Optional;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final RatingStorage ratingStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("ratingDbStorage")RatingStorage ratingStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.ratingStorage = ratingStorage;
     }
 
     public List<Film> getAllFilms() {
@@ -37,6 +41,8 @@ public class FilmService {
 
         filmStorage.add(film);
         log.debug(String.format("new film with id=%s added successfully", film.getId()));
+
+        film.setMpa(ratingStorage.getRatingById(film.getMpa().getId()));
 
         return film;
     }
