@@ -57,173 +57,173 @@ class UserControllerTest {
         user.setBirthday(LocalDate.of(1990, Month.NOVEMBER, 17));
     }
 
-    @Test
-    void addValidUserIsOk() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void updateValidUserWithEmptyNameIsOk() throws Exception {
-        user.setId(66);
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        user.setName("");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        Optional<User> optionalUser = userStorage.getUserById(66);
-
-        assertTrue(optionalUser.isPresent());
-
-        User updatedUser = optionalUser.get();
-
-        assertThat(updatedUser.getName()).isEqualTo(user.getLogin());
-    }
-
-    @Test
-    void addUserWithInvalidLogin() throws Exception {
-        user.setLogin("");
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-
-        user.setLogin("Login login");
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void addUserWithInvalidEmail() throws Exception {
-        user.setEmail("email");
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-
-        user.setEmail("");
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void addUserWithInvalidBirthday() throws Exception {
-        user.setBirthday(LocalDate.of(2990, Month.NOVEMBER, 17));
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateValidUserIsOk() throws Exception {
-        user = new User();
-        user.setLogin("NewUser");
-        user.setName("Family Name");
-        user.setEmail("new@yandex.ru");
-        user.setId(15);
-        user.setBirthday(LocalDate.of(1999, Month.DECEMBER, 29));
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                        .andExpect(status().isOk());
-
-        user.setName("Name Family");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        Optional<User> optionalUser = userStorage.getUserById(15);
-
-        assertTrue(optionalUser.isPresent());
-
-        User updatedUser = optionalUser.get();
-
-        assertThat(updatedUser.getName()).isEqualTo("Name Family");
-    }
-
-    @Test
-    void addValidUserWithEmptyNameIsOk() throws Exception {
-        user.setName("");
-        user.setId(11);
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        Optional<User> optionalUser = userStorage.getUserById(11);
-
-        assertTrue(optionalUser.isPresent());
-
-        User addedUser = optionalUser.get();
-
-        assertThat(addedUser.getName()).isEqualTo("Login");
-    }
-
-    @Test
-    void updateUserWithInvalidLogin() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        user.setLogin("");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-
-        user.setLogin("Login login");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateUserWithInvalidEmail() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        user.setEmail("email");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-
-        user.setEmail("");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateUserWithInvalidBirthday() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        user.setBirthday(LocalDate.of(2990, Month.NOVEMBER, 17));
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
+//    @Test
+//    void addValidUserIsOk() throws Exception {
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//    }
+//
+//    @Test
+//    void updateValidUserWithEmptyNameIsOk() throws Exception {
+//        user.setId(66);
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        user.setName("");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        Optional<User> optionalUser = userStorage.getUserById(66);
+//
+//        assertTrue(optionalUser.isPresent());
+//
+//        User updatedUser = optionalUser.get();
+//
+//        assertThat(updatedUser.getName()).isEqualTo(user.getLogin());
+//    }
+//
+//    @Test
+//    void addUserWithInvalidLogin() throws Exception {
+//        user.setLogin("");
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//
+//        user.setLogin("Login login");
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void addUserWithInvalidEmail() throws Exception {
+//        user.setEmail("email");
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//
+//        user.setEmail("");
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void addUserWithInvalidBirthday() throws Exception {
+//        user.setBirthday(LocalDate.of(2990, Month.NOVEMBER, 17));
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void updateValidUserIsOk() throws Exception {
+//        user = new User();
+//        user.setLogin("NewUser");
+//        user.setName("Family Name");
+//        user.setEmail("new@yandex.ru");
+//        user.setId(15);
+//        user.setBirthday(LocalDate.of(1999, Month.DECEMBER, 29));
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                        .andExpect(status().isOk());
+//
+//        user.setName("Name Family");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        Optional<User> optionalUser = userStorage.getUserById(15);
+//
+//        assertTrue(optionalUser.isPresent());
+//
+//        User updatedUser = optionalUser.get();
+//
+//        assertThat(updatedUser.getName()).isEqualTo("Name Family");
+//    }
+//
+//    @Test
+//    void addValidUserWithEmptyNameIsOk() throws Exception {
+//        user.setName("");
+//        user.setId(11);
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        Optional<User> optionalUser = userStorage.getUserById(11);
+//
+//        assertTrue(optionalUser.isPresent());
+//
+//        User addedUser = optionalUser.get();
+//
+//        assertThat(addedUser.getName()).isEqualTo("Login");
+//    }
+//
+//    @Test
+//    void updateUserWithInvalidLogin() throws Exception {
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        user.setLogin("");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//
+//        user.setLogin("Login login");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void updateUserWithInvalidEmail() throws Exception {
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        user.setEmail("email");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//
+//        user.setEmail("");
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void updateUserWithInvalidBirthday() throws Exception {
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isOk());
+//
+//        user.setBirthday(LocalDate.of(2990, Month.NOVEMBER, 17));
+//        mockMvc.perform(put("/users")
+//                        .contentType("application/json")
+//                        .content(mapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest());
+//    }
 }
