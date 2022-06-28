@@ -126,8 +126,9 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> commonFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, user_id, friend_id);
         if (!commonFilms.isEmpty()) {
             commonFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+            return commonFilms;
         }
-        return commonFilms;
+        return null;
     }
 
     @Override
