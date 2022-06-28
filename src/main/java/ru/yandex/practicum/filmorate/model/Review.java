@@ -2,9 +2,11 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Required;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 
 @AllArgsConstructor
 @ToString
@@ -18,15 +20,23 @@ public class Review {
 
     @NotNull(message = "Content may not be null")
     private String content;
-    private boolean isPositive;
-    @Positive
-    private Integer userId;
-    @Positive
-    private Integer filmId;
-    //private int useful;
 
-    @JsonProperty("reviewId")
+    @NotNull
+    private Boolean isPositive;
+    private Integer userId;
+    private Integer filmId;
+    private int useful;
+
     public Integer getId() {
         return id;
+    }
+
+    @JsonProperty("isPositive")
+    public boolean isPositive() {
+        return isPositive;
+    }
+
+    public void setPositive(boolean isPositive) {
+        this.isPositive = isPositive;
     }
 }

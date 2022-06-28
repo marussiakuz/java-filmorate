@@ -103,7 +103,6 @@ public class ReviewService {
     }
 
     private void validateReview(int id) {
-        System.out.println("reviewsStorage.doesReviewExist(id) "+ reviewsStorage.doesReviewExist(id));
         if (!reviewsStorage.doesReviewExist(id))
             throw new ReviewNotFoundException(String.format("Review with id=%s not found", id));
     }

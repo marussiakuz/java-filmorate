@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS review (
 CREATE TABLE IF NOT EXISTS review_usefulness (
     review_id INT,
     user_id INT,
-    like_dislike INT,
+    like_dislike INT NOT NULL DEFAULT 0,
     FOREIGN KEY (review_id)  REFERENCES review (review_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE
 );

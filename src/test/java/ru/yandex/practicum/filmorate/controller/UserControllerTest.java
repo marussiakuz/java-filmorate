@@ -118,7 +118,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
-                        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         user.setName("Name Family");
         user.setId(2);
