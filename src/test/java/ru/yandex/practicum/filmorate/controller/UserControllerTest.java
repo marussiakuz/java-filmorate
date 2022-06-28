@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
-import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -38,9 +37,6 @@ class UserControllerTest {
 
     @Autowired
     private UserController userController;
-
-    @Autowired
-    private UserService userService;
 
     @Qualifier("userDbStorage")
     @Autowired
