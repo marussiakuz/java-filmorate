@@ -38,7 +38,7 @@ class UserControllerTest {
     @Autowired
     private UserController userController;
 
-    @Qualifier("inMemoryUserStorage")
+    @Qualifier("userDbStorage")
     @Autowired
     private UserStorage userStorage;
 

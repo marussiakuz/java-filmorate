@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -173,21 +172,10 @@ class FilmControllerTest {
 
     @Test
     void getCommonFilms() throws Exception {
-        User user1 = new User();
-        user1.setName("User1");
-        user1.setLogin("User1");
-        user1.setEmail("email@mail.ru");
-        user1.setBirthday(LocalDate.of(1990, Month.NOVEMBER, 17));
-        User user2 = new User();
-        user2.setName("User2");
-        user2.setLogin("User2");
-        user2.setEmail("email@gmail.ru");
-        user2.setBirthday(LocalDate.of(1991, Month.NOVEMBER, 17));
-        User user3 = new User();
-        user3.setName("User3");
-        user3.setLogin("User3");
-        user3.setEmail("email@ymail.ru");
-        user3.setBirthday(LocalDate.of(1992, Month.NOVEMBER, 17));
+        String user1 = "{\"login\": \"dolore\", \"name\": \"Nick Name\", \"email\": \"mail@mail.ru\", \"birthday\": \"1946-08-20\"}";
+        String user2 = "{\"login\": \"dolores\", \"name\": \"Nick Names\", \"email\": \"mail@gmail.ru\", \"birthday\": \"1946-08-20\"}";
+        String user3 = "{\"login\": \"dolorez\", \"name\": \"Nick Namez\", \"email\": \"mail@imail.ru\", \"birthday\": \"1946-08-20\"}";
+
         Rating rating = Rating.builder()
                 .id(1)
                 .name("G")
@@ -208,33 +196,34 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(film2)))
                 .andExpect(status().isOk());
+            mockMvc.perform(post("/users")
+                            .contentType("application/json")
+                            .content(user1))
+                    .andExpect(status().isOk());
         mockMvc.perform(post("/users")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(user1)))
+                        .content(user2))
                 .andExpect(status().isOk());
         mockMvc.perform(post("/users")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(user2)))
+                        .content(user3))
                 .andExpect(status().isOk());
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user3)))
+        mockMvc.perform(put("/films/1/like/1"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/films/1/like/1"))
+        mockMvc.perform(put("/films/1/like/2"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/films/1/like/2"))
+        mockMvc.perform(put("/films/2/like/1"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/films/2/like/1"))
+        mockMvc.perform(put("/films/2/like/2"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/films/2/like/2"))
-                .andExpect(status().isOk());
-        mockMvc.perform(get("/films/2/like/3"))
+        mockMvc.perform(put("/films/2/like/3"))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/films/common?userId=1&friendId=2"))
                 .andExpect(status().isOk());
-         filmStorage.getCommonFilms(1,2);
-        assertEquals(2,filmStorage.getCommonFilms(1,2).size());
-        assertEquals(2,filmStorage.getCommonFilms(1,2).get(0).getId());
-        assertEquals(1,filmStorage.getCommonFilms(1,2).get(1).getId());
+        mockMvc.perform(get("/films/common?userId=5&friendId=2"))
+                .andExpect(status().isNotFound());
+        assertEquals(2, filmStorage.getCommonFilms(1, 2).size());
+        assertEquals(2, filmStorage.getCommonFilms(1, 2).get(0).getId());
+        assertEquals(1, filmStorage.getCommonFilms(1, 2).get(1).getId());
     }
 }
