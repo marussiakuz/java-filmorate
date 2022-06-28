@@ -38,7 +38,7 @@ class UserControllerTest {
     @Autowired
     private UserController userController;
 
-    @Qualifier("inMemoryUserStorage")
+    @Qualifier("userDbStorage")
     @Autowired
     private UserStorage userStorage;
 
@@ -63,29 +63,6 @@ class UserControllerTest {
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void updateValidUserWithEmptyNameIsOk() throws Exception {
-        user.setId(66);
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        user.setName("");
-        mockMvc.perform(put("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        Optional<User> optionalUser = userStorage.getUserById(66);
-
-        assertTrue(optionalUser.isPresent());
-
-        User updatedUser = optionalUser.get();
-
-        assertThat(updatedUser.getName()).isEqualTo(user.getLogin());
     }
 
     @Test
@@ -133,44 +110,27 @@ class UserControllerTest {
         user.setLogin("NewUser");
         user.setName("Family Name");
         user.setEmail("new@yandex.ru");
-        user.setId(15);
         user.setBirthday(LocalDate.of(1999, Month.DECEMBER, 29));
         mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
-                        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         user.setName("Name Family");
+        user.setId(2);
+        System.out.println("user "+ user);
         mockMvc.perform(put("/users")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
 
-        Optional<User> optionalUser = userStorage.getUserById(15);
+        Optional<User> optionalUser = userStorage.getUserById(2);
 
         assertTrue(optionalUser.isPresent());
 
         User updatedUser = optionalUser.get();
 
         assertThat(updatedUser.getName()).isEqualTo("Name Family");
-    }
-
-    @Test
-    void addValidUserWithEmptyNameIsOk() throws Exception {
-        user.setName("");
-        user.setId(11);
-        mockMvc.perform(post("/users")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        Optional<User> optionalUser = userStorage.getUserById(11);
-
-        assertTrue(optionalUser.isPresent());
-
-        User addedUser = optionalUser.get();
-
-        assertThat(addedUser.getName()).isEqualTo("Login");
     }
 
     @Test
