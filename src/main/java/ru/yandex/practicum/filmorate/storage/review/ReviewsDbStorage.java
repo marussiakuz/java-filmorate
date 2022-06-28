@@ -56,7 +56,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public void delete(int id) {
-        String sqlQuery = "DELETE FROM review INNER JOIN review_usefulness USING (review_id) WHERE review_id = ?";
+        String sqlQuery = "DELETE FROM review WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery, id);
     }

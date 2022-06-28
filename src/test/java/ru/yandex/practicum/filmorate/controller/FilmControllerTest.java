@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
@@ -37,9 +39,11 @@ class FilmControllerTest {
     @Autowired
     private FilmController filmController;
 
-    @Qualifier("inMemoryFilmStorage")
     @Autowired
-    private FilmStorage filmStorage;
+    private FilmService filmService;
+
+    @Autowired
+    private FilmDbStorage filmStorage;
 
     @Autowired
     private ObjectMapper mapper;
