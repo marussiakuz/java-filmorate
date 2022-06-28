@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.FilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
@@ -44,7 +45,7 @@ public class FilmService {
         validateFilm(film.getId());
 
         filmStorage.update(film);
-        log.debug(String.format("film data data with id=%s has been successfully updated", film.getId()));
+        log.debug(String.format("film data with id=%s has been successfully updated", film.getId()));
 
         return film;
     }

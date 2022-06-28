@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS film_genre;
 DROP TABLE IF EXISTS genre;
 DROP TABLE IF EXISTS friendship;
+DROP TABLE IF EXISTS review_usefulness;
+DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS film;
@@ -30,7 +32,7 @@ CREATE TABLE IF NOT EXISTS rating (
 CREATE TABLE IF NOT EXISTS film (
     film_id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(30),
-    description VARCHAR(30),
+    description VARCHAR(200),
     release_date DATE,
     duration INT,
     rating_id INT,
@@ -54,4 +56,23 @@ CREATE TABLE IF NOT EXISTS film_genre (
     genre_id INT,
     FOREIGN KEY (film_id)  REFERENCES film (film_id) ON DELETE CASCADE,
     FOREIGN KEY (genre_id)  REFERENCES genre (genre_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS review (
+    review_id INT PRIMARY KEY AUTO_INCREMENT,
+    review_content TEXT,
+    is_positive BOOLEAN,
+    user_id INT,
+    film_id INT,
+    FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (film_id)  REFERENCES film (film_id) ON DELETE CASCADE
+);
+
+-- в таблице review_usefulness хранятся лайки / дизлайки (лайк = 1, дизлайк = -1)
+CREATE TABLE IF NOT EXISTS review_usefulness (
+    review_id INT,
+    user_id INT,
+    like_dislike INT,
+    FOREIGN KEY (review_id)  REFERENCES review (review_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE
 );
