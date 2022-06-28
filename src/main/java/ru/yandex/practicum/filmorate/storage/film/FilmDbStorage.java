@@ -152,6 +152,36 @@ public class FilmDbStorage implements FilmStorage {
         return count > 0;
     }
 
+    @Override
+    public List<Film> getRecommendations(int userId) {
+        String sqlQuery = "SELECT l2.userId" +
+                "FROM likes AS l1" +
+                "JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID" +
+                "WHERE l1.USER_ID = 1 AND l1.USER_ID<>l2.USER_ID" +
+                "GROUP BY l1.USER_ID , l2.USER_ID" +
+                "ORDER BY coincidence DESC" +
+                "LIMIT 1";
+        int bestUserId = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+
+        sqlQuery = "SELECT film_id FROM(" +
+                "SELECT film_id FROM likes" +
+                "WHERE USER_ID = ?" +
+                "EXCEPT" +
+                "SELECT\tfilm_id FROM likes" +
+                "WHERE USER_ID = ?)";
+
+        List<Film> recommendationsFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUserId, userId);
+        if (!recommendationsFilms.isEmpty()) {
+            for (Film f : recommendationsFilms) {
+                if (!getGenresByFilmId(f.getId()).isEmpty()) {
+                    f.setGenres(getGenresByFilmId(f.getId()));
+                }
+            }
+        }
+        return recommendationsFilms;
+
+    }
+
     private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()

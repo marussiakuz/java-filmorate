@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -16,9 +18,11 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FilmStorage filmStorage) {
         this.userStorage = userStorage;
+        this.filmStorage = filmStorage;
     }
 
     public List<User> getAllUsers() {
@@ -95,5 +99,11 @@ public class UserService {
         if (!userStorage.doesFriendExist(userId, friendId))
             throw new FriendNotFoundException(String.format("the user with id=%s does not have a friend with user id=%s",
                     userId, friendId));
+    }
+
+    public List<Film> getRecommendations(int userId) {
+        if (!userStorage.doesUserExist(userId))
+            throw new UserNotFoundException(String.format("User with id=%s not found", userId));
+       return filmStorage.getRecommendations(userId);
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
@@ -97,7 +98,7 @@ public class UserDbStorage implements UserStorage {
     public boolean doesUserExist(int userId) {
         String sql = "SELECT COUNT(*) FROM users WHERE user_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId}, Integer.class);
 
         return count > 0;
     }
@@ -106,12 +107,12 @@ public class UserDbStorage implements UserStorage {
     public boolean doesFriendExist(int userId, int friendId) {
         String sql = "SELECT COUNT(*) FROM friendship WHERE user_id = ? AND friend_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, friendId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, friendId}, Integer.class);
 
         return count > 0;
     }
 
-    private User mapRowToUser (ResultSet resultSet, int rowNum) throws SQLException {
+    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
                 .id(resultSet.getInt("user_id"))
                 .name(resultSet.getString("name"))
