@@ -89,4 +89,12 @@ public class FilmService {
             throw new LikeNotFoundException(String.format("Film with id=%s was not liked by a user with id=%s",
                     filmId, userId));
     }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        if (!userStorage.doesUserExist(userId))
+            throw new UserNotFoundException(String.format("User with id=%s not found", userId));
+        if (!userStorage.doesUserExist(friendId))
+            throw new UserNotFoundException(String.format("User with id=%s not found", friendId));
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }
