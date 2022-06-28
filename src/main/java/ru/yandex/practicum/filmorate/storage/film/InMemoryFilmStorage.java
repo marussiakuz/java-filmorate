@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -21,7 +20,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void add(Film film) {
         if (film.getId() == null || film.getId() == 0) {
-            if (films.isEmpty()) film.setId(1);
+            if (films.isEmpty())
+                film.setId(1);
             else {
                 int maxId = films.keySet().stream().max(Comparator.naturalOrder()).get();
                 film.setId(++maxId);
@@ -72,7 +72,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public boolean doesLikeExist(int filmId, int userId) {
-        if (!doesFilmExist(filmId) || getFilmById(filmId).isEmpty()) return false;
+        if (!doesFilmExist(filmId) || getFilmById(filmId).isEmpty())
+            return false;
         Film film = getFilmById(filmId).get();
         return film.getLikes().contains(userId);
     }

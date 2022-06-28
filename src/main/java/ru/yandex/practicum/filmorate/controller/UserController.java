@@ -1,16 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
-
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends AbstractController<User>{
+public class UserController extends AbstractController<User> {
     private final UserService userService;
 
     public UserController(UserService userService) {

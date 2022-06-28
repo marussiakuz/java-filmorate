@@ -5,17 +5,18 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.format.annotation.DateTimeFormat;
-import javax.validation.constraints.*;
-
 import ru.yandex.practicum.filmorate.validators.IsAfter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.NUMBER_INT;
 
 @ToString
 @EqualsAndHashCode
@@ -26,9 +27,8 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 @Builder
 public class Film {
 
-    private Integer id;
     private final Set<Integer> likes = new TreeSet<>();
-
+    private Integer id;
     @NotNull(message = "Title may not be null")
     @NotBlank(message = "Title may not be blank")
     private String name;
@@ -51,11 +51,11 @@ public class Film {
     private Rating mpa;
     private List<Genre> genres;
 
-    public void addLike(Integer userId){
+    public void addLike(Integer userId) {
         likes.add(userId);
     }
 
-    public void deleteLike(Integer userId){
+    public void deleteLike(Integer userId) {
         likes.remove(userId);
     }
 

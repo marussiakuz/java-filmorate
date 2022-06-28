@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -52,7 +51,8 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
-        if (film.getGenres() != null) addGenresToTheFilm(film);
+        if (film.getGenres() != null)
+            addGenresToTheFilm(film);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
-            film.setGenres(genres.isEmpty()? null : genres);
+            film.setGenres(genres.isEmpty() ? null : genres);
         }
 
         return Optional.ofNullable(film);
@@ -138,7 +138,7 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
 
         return count > 0;
     }
@@ -147,12 +147,12 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesLikeExist(int filmId, int userId) {
         String sql = "SELECT COUNT(*) FROM likes WHERE user_id = ? AND film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, filmId}, Integer.class);
 
         return count > 0;
     }
 
-    private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -167,7 +167,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))
@@ -182,7 +182,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void addGenresToTheFilm(Film film) {
-        if (film.getGenres() == null || film.getGenres().isEmpty()) return;
+        if (film.getGenres() == null || film.getGenres().isEmpty())
+            return;
 
         String sqlQuery = "INSERT INTO film_genre(film_id, genre_id) SELECT ?, ?";
 

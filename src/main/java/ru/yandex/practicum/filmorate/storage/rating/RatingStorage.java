@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface RatingStorage {
 
-    public List<Rating> getAllMpa();
-    public Rating getRatingById(int id);
-    public boolean doesRatingExist(int id);
+    List<Rating> getAllMpa();
+
+    Rating getRatingById(int id);
+
+    boolean doesRatingExist(int id);
 }

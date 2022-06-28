@@ -19,8 +19,9 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException e) {
         Optional<FieldError> fieldError = Optional.ofNullable(e.getFieldError());
-        String message = fieldError.isPresent()? fieldError.get().getDefaultMessage() : "unknown error";
-        if (fieldError.isPresent()) log.debug("Validation failed: " + message);
+        String message = fieldError.isPresent() ? fieldError.get().getDefaultMessage() : "unknown error";
+        if (fieldError.isPresent())
+            log.debug("Validation failed: " + message);
         return new ErrorResponse("Some data is incorrect: " + e.getFieldError().getDefaultMessage());
     }
 
@@ -28,10 +29,14 @@ public class ErrorHandler {
             GenreNotFoundException.class, RatingNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
-        if (e instanceof FilmNotFoundException) return new ErrorResponse("Film not found");
-        else if (e instanceof LikeNotFoundException) return new ErrorResponse("Like not found");
-        else if (e instanceof RatingNotFoundException) return new ErrorResponse("Rating not found");
-        else if (e instanceof GenreNotFoundException) return new ErrorResponse("Genre not found");
+        if (e instanceof FilmNotFoundException)
+            return new ErrorResponse("Film not found");
+        else if (e instanceof LikeNotFoundException)
+            return new ErrorResponse("Like not found");
+        else if (e instanceof RatingNotFoundException)
+            return new ErrorResponse("Rating not found");
+        else if (e instanceof GenreNotFoundException)
+            return new ErrorResponse("Genre not found");
         return new ErrorResponse("User not found");
     }
 

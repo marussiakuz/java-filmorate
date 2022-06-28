@@ -45,6 +45,7 @@ public class UserService {
 
         return user;
     }
+
     public User getUserById(int userId) {
         validate(userId);
 
@@ -88,7 +89,8 @@ public class UserService {
     }
 
     private void checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank())
+            user.setName(user.getLogin());
     }
 
     private void validateFriendship(int userId, int friendId) {
