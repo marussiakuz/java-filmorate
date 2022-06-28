@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
@@ -27,6 +28,8 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 public class Film {
 
     private Integer id;
+
+    @JsonIgnore
     private final Set<Integer> likes = new TreeSet<>();
 
     @NotNull(message = "Title may not be null")
