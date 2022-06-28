@@ -52,7 +52,7 @@ public class FilmController extends AbstractController<Film> {
         return filmService.getMostPopularFilms(count);
     }
     @GetMapping(value = "/common")
-    public List<Film> getPopularFilms(@RequestParam Integer userId, Integer friendId) {
+    public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
 }
