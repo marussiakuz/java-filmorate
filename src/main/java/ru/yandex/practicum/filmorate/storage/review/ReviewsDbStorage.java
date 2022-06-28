@@ -73,7 +73,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public List<Review> getAllReviews(int count) {
-        String sqlQuery = "SELECT * FROM LEFT JOIN (SELECT review_id, SUM(like_dislike) AS usefulness " +
+        String sqlQuery = "SELECT * FROM review LEFT JOIN (SELECT review_id, SUM(like_dislike) AS usefulness " +
                 "FROM review_usefulness GROUP BY review_id) USING (review_id) limit ?";
 
         List<Review> allReviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
@@ -154,7 +154,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
                 .isPositive(resultSet.getBoolean("is_positive"))
                 .userId(resultSet.getInt("user_id"))
                 .filmId(resultSet.getInt("film_id"))
-                .useful(resultSet.getInt("usefulness"))
+                //.useful(resultSet.getInt("usefulness"))
                 .build();
     }
 }

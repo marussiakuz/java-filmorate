@@ -23,7 +23,7 @@ public class Review {
     private Integer userId;
     @Positive
     private Integer filmId;
-    private int useful;
+    //private int useful;
 
     @JsonProperty("reviewId")
     public Integer getId() {

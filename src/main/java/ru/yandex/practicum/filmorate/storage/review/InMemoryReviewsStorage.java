@@ -64,8 +64,8 @@ public class InMemoryReviewsStorage implements ReviewsStorage {
 
         likes.put(reviewId, reviewLikes);
 
-        Review review = reviews.get(reviewId);
-        review.setUseful(review.getUseful() + 1);
+       /* Review review = reviews.get(reviewId);
+        review.setUseful(review.getUseful() + 1);*/
     }
 
     @Override
@@ -75,8 +75,8 @@ public class InMemoryReviewsStorage implements ReviewsStorage {
 
         likes.put(reviewId, reviewDislikes);
 
-        Review review = reviews.get(reviewId);
-        review.setUseful(review.getUseful() - 1);
+        /*Review review = reviews.get(reviewId);
+        review.setUseful(review.getUseful() - 1);*/
     }
 
     @Override
@@ -84,8 +84,8 @@ public class InMemoryReviewsStorage implements ReviewsStorage {
         Set<Integer> reviewLikes = likes.get(reviewId);
         reviewLikes.remove(userId);
 
-        Review review = reviews.get(reviewId);
-        review.setUseful(review.getUseful() - 1);
+        /*Review review = reviews.get(reviewId);
+        review.setUseful(review.getUseful() - 1);*/
     }
 
     @Override
@@ -93,8 +93,8 @@ public class InMemoryReviewsStorage implements ReviewsStorage {
         Set<Integer> reviewDislikes = dislikes.get(reviewId);
         reviewDislikes.remove(userId);
 
-        Review review = reviews.get(reviewId);
-        review.setUseful(review.getUseful() + 1);
+        /*Review review = reviews.get(reviewId);
+        review.setUseful(review.getUseful() + 1);*/
     }
 
     @Override
