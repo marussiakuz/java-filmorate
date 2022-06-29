@@ -89,4 +89,12 @@ public class FilmService {
             throw new LikeNotFoundException(String.format("Film with id=%s was not liked by a user with id=%s",
                     filmId, userId));
     }
+
+    public void deleteFilmByIdService(int filmId){
+        validateFilm(filmId);
+        filmStorage.deleteFilmByIdStorage(filmId);
+        log.debug(String.format("the film with id=%s was deleted", filmId));
+    }
+
+
 }

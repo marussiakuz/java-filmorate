@@ -256,4 +256,52 @@ class FilmorateApplicationTests {
 		assertEquals(filmDbStorage.getFilmById(4).get(), popular.get(0));
 		assertEquals(filmDbStorage.getFilmById(3).get(), popular.get(1));
 	}
+	@Test
+	public void deleteUserByIdTest() {
+		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
+
+		User userDel = User.builder()
+				.name("NameDel")
+				.login("loginDel")
+				.email("emailDel@gmail.com")
+				.birthday(LocalDate.of(1980, 12, 12))
+				.build();
+
+		userDbStorage.add(userDel);
+
+		assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
+
+		userDbStorage.deleteUserByIdStorage(userDel.getId());
+
+		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
+	}
+
+	@Test
+	public void deleteFilmByIdTest() {
+		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
+
+		Film filmDel = Film.builder()
+				.name("TitleDel")
+				.description("aboutDel.. ")
+				.duration(Duration.ofMinutes(100))
+				.releaseDate(LocalDate.of(1976, 6, 6))
+				.mpa(Rating.builder()
+						.name("G")
+						.id(1)
+						.build())
+				.build();
+
+		filmDbStorage.add(filmDel);
+
+		assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
+
+		filmDbStorage.deleteFilmByIdStorage(filmDel.getId());
+
+		assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
+
+	}
+
+
+
+
 }
