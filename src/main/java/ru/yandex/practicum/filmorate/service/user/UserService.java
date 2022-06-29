@@ -116,4 +116,10 @@ public class UserService {
             throw new FriendNotFoundException(String.format("the user with id=%s does not have a friend with user id=%s",
                     userId, friendId));
     }
+    public void deleteUserByIdService(int userId){
+        validate(userId);
+        userStorage.deleteUserByIdStorage(userId);
+        log.debug(String.format("the user with id=%s was deleted", userId));
+    }
+
 }
