@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.filmorate.model.User;
 
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
@@ -59,6 +60,7 @@ class UserControllerTest {
     @BeforeEach
     private void beforeEach() {
         user = new User();
+        user.setId(6);
         user.setLogin("Login");
         user.setName("Name");
         user.setEmail("email@yandex.ru");
@@ -71,6 +73,55 @@ class UserControllerTest {
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void addValidUserWithEmptyNameIsOk() throws Exception {
+        user.setName("");
+        MvcResult result = mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Optional<User> optionalUser = userStorage.getUserById(6);
+
+        assertTrue(optionalUser.isPresent());
+
+        User addedUser = optionalUser.get();
+
+        assertThat(addedUser.getName()).isEqualTo("Login");
+    }
+
+    @Test
+    void updateValidUserWithEmptyNameIsOk() throws Exception {
+        User newUser = User.builder()
+                .id(6)
+                .name("new")
+                .email("new@yandex.ru")
+                .login("XXX")
+                .birthday(LocalDate.of(1987, Month.FEBRUARY, 12))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(newUser)))
+                .andExpect(status().isOk());
+
+        newUser.setName(" ");
+
+        mockMvc.perform(put("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(newUser)))
+                .andExpect(status().isOk());
+
+        Optional<User> optionalUser = userStorage.getUserById(6);
+
+        assertTrue(optionalUser.isPresent());
+
+        User updatedUser = optionalUser.get();
+
+        assertThat(updatedUser.getName()).isEqualTo("XXX");
     }
 
     @Test

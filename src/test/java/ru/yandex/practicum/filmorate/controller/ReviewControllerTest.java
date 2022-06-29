@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +18,11 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,68 +63,104 @@ class ReviewControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void addUpdateGetDelete() throws Exception {
+    @BeforeEach
+    void setUp() {
         review = Review.builder()
+                .id(1)
                 .content("very good")
                 .userId(1)
                 .filmId(1)
                 .isPositive(true)
                 .build();
+    }
 
-        String reviewBody = mapper.writeValueAsString(review);
-        this.mockMvc.perform(post("/reviews").content(reviewBody).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+    @Test
+    void addUpdateGetDelete() throws Exception {
+        this.mockMvc.perform(post("/reviews")
+                        .content(mapper.writeValueAsString(review))
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk());
 
-        review.setId(1);
         review.setContent("not recommended");
         review.setPositive(false);
 
-        String updatedReviewBody = mapper.writeValueAsString(review);
+        this.mockMvc.perform(put("/reviews")
+                        .content(mapper.writeValueAsString(review))
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk());
 
-        System.out.println("updatedReviewBody " + updatedReviewBody);
+        Optional<Review> optionalReview = reviewsStorage.getReviewById(1);
 
-        this.mockMvc.perform(put("/reviews").content(updatedReviewBody).contentType(MediaType.APPLICATION_JSON))
+        assertTrue(optionalReview.isPresent());
+
+        Review updatedReview = optionalReview.get();
+
+        assertThat(updatedReview.getContent())
+                .isEqualTo("not recommended");
+        assertFalse(updatedReview.isPositive());
+
+        this.mockMvc.perform(get("/reviews/1"))
                 .andExpect(status().isOk());
 
-        this.mockMvc.perform(get("/reviews/1")).andExpect(status().isOk());
-
-        this.mockMvc.perform(delete("/reviews/1")).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/reviews/1"))
+                .andExpect(status().isOk());
     }
 
     @Test
     void putDeleteLikeAndPutDeleteDislike() throws Exception {
-        review = Review.builder()
-                .content("very good")
-                .userId(1)
-                .filmId(1)
-                .isPositive(true)
-                .build();
+        this.mockMvc.perform(post("/reviews")
+                .content(mapper.writeValueAsString(review))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
-        String reviewBody = mapper.writeValueAsString(review);
-        this.mockMvc.perform(post("/reviews").content(reviewBody).contentType(MediaType.APPLICATION_JSON));
+        this.mockMvc.perform(put("/reviews/1/like/1"))
+                .andExpect(status().isOk());
 
-        this.mockMvc.perform(put("/reviews/1/like/1")).andExpect(status().isOk());
+        Optional<Review> optionalLikedReview = reviewsStorage.getReviewById(1);
 
-        this.mockMvc.perform(delete("/reviews/1/like/1")).andExpect(status().isOk());
+        assertTrue(optionalLikedReview.isPresent());
 
-        this.mockMvc.perform(put("/reviews/1/dislike/1")).andExpect(status().isOk());
+        Review reviewWithLike = optionalLikedReview.get();
 
-        this.mockMvc.perform(delete("/reviews/1/dislike/1")).andExpect(status().isOk());
+        assertThat(reviewWithLike.getUseful())
+                .isEqualTo(1);
+
+        this.mockMvc.perform(delete("/reviews/1/like/1"))
+                .andExpect(status().isOk());
+
+        this.mockMvc.perform(put("/reviews/1/dislike/1"))
+                .andExpect(status().isOk());
+
+        Optional<Review> optionalDislikedReview = reviewsStorage.getReviewById(1);
+
+        assertTrue(optionalDislikedReview.isPresent());
+
+        Review reviewWithDislike = optionalDislikedReview.get();
+
+        assertThat(reviewWithDislike.getUseful())
+                .isEqualTo(-1);
+
+        this.mockMvc.perform(delete("/reviews/1/dislike/1"))
+                .andExpect(status().isOk());
+
+        Optional<Review> optionalReview = reviewsStorage.getReviewById(1);
+
+        assertTrue(optionalReview.isPresent());
+
+        Review reviewWithoutLikeDislike = optionalReview.get();
+
+        assertThat(reviewWithoutLikeDislike.getUseful())
+                .isEqualTo(0);
     }
 
     @Test
     void getReviewsByFilmId() throws Exception {
-        review = Review.builder()
-                .content("very good")
-                .userId(1)
-                .filmId(1)
-                .isPositive(true)
-                .build();
+        this.mockMvc.perform(post("/reviews")
+                .content(mapper.writeValueAsString(review))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
-        String reviewBody = mapper.writeValueAsString(review);
-        this.mockMvc.perform(post("/reviews").content(reviewBody).contentType(MediaType.APPLICATION_JSON));
-
-        this.mockMvc.perform(get("/reviews?filmId=1&count=5")).andExpect(status().isOk());
+        this.mockMvc.perform(get("/reviews?filmId=1&count=5"))
+                .andExpect(status().isOk());
     }
 }
