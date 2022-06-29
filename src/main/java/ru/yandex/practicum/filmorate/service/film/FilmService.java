@@ -108,6 +108,12 @@ public class FilmService {
                     filmId, userId));
     }
 
+    public void deleteFilmByIdService(int filmId){
+        validateFilm(filmId);
+        filmStorage.deleteFilmByIdStorage(filmId);
+        log.debug(String.format("the film with id=%s was deleted", filmId));
+    }
+
     public List<Film> getCommonFilms(int userId, int friendId) {
         if (!userStorage.doesUserExist(userId))
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
