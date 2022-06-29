@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.validation.constraints.*;
 
+import ru.yandex.practicum.filmorate.model.serializers.DurationSerializer;
 import ru.yandex.practicum.filmorate.validators.IsAfter;
 
 import java.time.Duration;

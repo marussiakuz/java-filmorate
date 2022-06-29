@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -11,15 +12,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureTestDatabase
@@ -56,13 +64,58 @@ class FilmControllerTest {
         film.setDescription("Comedy");
         film.setDuration(Duration.ofMinutes(130));
         film.setReleaseDate(LocalDate.of(2012, Month.DECEMBER, 12));
-        film.setMpa(Rating.builder().name("G").build());
+        film.setMpa(Rating.builder().id(1).name("G").build());
+        film.setGenres(List.of(Genre.builder().id(1).name("Комедия").build()));
+    }
+
+    @Test
+    void addValidFilmIsOk() throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateValidFilmIsOk() throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+
+        film.setDescription("thriller");
+        mockMvc.perform(put("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+
+        Optional<Film> optionalFilm = filmStorage.getFilmById(6);
+
+        assertTrue(optionalFilm.isPresent());
+
+        Film updatedFilm = optionalFilm.get();
+
+        assertThat(updatedFilm.getDescription()).isEqualTo("thriller");
     }
 
     @Test
     void addFilmWithInvalidName() throws Exception {
         film.setName("");
         mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateFilmWithInvalidName() throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+
+        film.setName("");
+        mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
