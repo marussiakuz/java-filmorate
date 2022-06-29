@@ -6,12 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.filmorate.model.User;
 
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -29,7 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.liquibase.enabled=false",
         "spring.flyway.enabled=false"
 })
-
+@AutoConfigureTestDatabase
+@Sql({"/schema.sql", "/test-data.sql"})
 @AutoConfigureMockMvc
 class UserControllerTest {
 
@@ -42,6 +47,10 @@ class UserControllerTest {
     @Autowired
     private UserStorage userStorage;
 
+    @Qualifier("eventDbStorage")
+    @Autowired
+    private EventStorage eventStorage;
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -51,6 +60,7 @@ class UserControllerTest {
     @BeforeEach
     private void beforeEach() {
         user = new User();
+        user.setId(6);
         user.setLogin("Login");
         user.setName("Name");
         user.setEmail("email@yandex.ru");
@@ -63,6 +73,55 @@ class UserControllerTest {
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void addValidUserWithEmptyNameIsOk() throws Exception {
+        user.setName("");
+        MvcResult result = mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Optional<User> optionalUser = userStorage.getUserById(6);
+
+        assertTrue(optionalUser.isPresent());
+
+        User addedUser = optionalUser.get();
+
+        assertThat(addedUser.getName()).isEqualTo("Login");
+    }
+
+    @Test
+    void updateValidUserWithEmptyNameIsOk() throws Exception {
+        User newUser = User.builder()
+                .id(6)
+                .name("new")
+                .email("new@yandex.ru")
+                .login("XXX")
+                .birthday(LocalDate.of(1987, Month.FEBRUARY, 12))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(newUser)))
+                .andExpect(status().isOk());
+
+        newUser.setName(" ");
+
+        mockMvc.perform(put("/users")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(newUser)))
+                .andExpect(status().isOk());
+
+        Optional<User> optionalUser = userStorage.getUserById(6);
+
+        assertTrue(optionalUser.isPresent());
+
+        User updatedUser = optionalUser.get();
+
+        assertThat(updatedUser.getName()).isEqualTo("XXX");
     }
 
     @Test

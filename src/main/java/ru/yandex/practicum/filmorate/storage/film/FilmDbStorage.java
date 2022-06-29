@@ -174,6 +174,8 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
+
+
     private List<Genre> getGenresByFilmId(int filmId) {
         String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
                 "USING(genre_id)";
