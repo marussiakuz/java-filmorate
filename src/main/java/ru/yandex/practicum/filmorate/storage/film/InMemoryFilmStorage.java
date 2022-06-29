@@ -76,4 +76,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilmById(filmId).get();
         return film.getLikes().contains(userId);
     }
+
+    @Override
+    public List<Film> getRecommendations(int userId) {
+        throw new NotImplementedException();
+    }
+
 }

@@ -20,7 +20,8 @@ public class UserService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FilmStorage filmStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("filmDbStorage")
+    FilmStorage filmStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
     }
@@ -49,6 +50,7 @@ public class UserService {
 
         return user;
     }
+
     public User getUserById(int userId) {
         validate(userId);
 
@@ -104,6 +106,6 @@ public class UserService {
     public List<Film> getRecommendations(int userId) {
         if (!userStorage.doesUserExist(userId))
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-       return filmStorage.getRecommendations(userId);
+        return filmStorage.getRecommendations(userId);
     }
 }

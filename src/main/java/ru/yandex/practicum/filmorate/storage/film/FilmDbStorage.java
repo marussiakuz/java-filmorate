@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -82,7 +81,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
-            film.setGenres(genres.isEmpty()? null : genres);
+            film.setGenres(genres.isEmpty() ? null : genres);
         }
 
         return Optional.ofNullable(film);
@@ -116,14 +115,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getCommonFilms(int user_id, int friend_id) {
+    public List<Film> getCommonFilms(int userId, int friendId) {
 
         String sqlQuery = "SELECT * FROM film LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
                 "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT " +
                 "JOIN  likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
                 "WHERE l1.user_id = ? AND l2.user_id = ? ORDER BY count_like DESC";
 
-        List<Film> commonFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, user_id, friend_id);
+        List<Film> commonFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
         if (!commonFilms.isEmpty()) {
             for (Film f : commonFilms) {
                 if (!getGenresByFilmId(f.getId()).isEmpty()) {
@@ -138,7 +137,7 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
 
         return count > 0;
     }
@@ -147,30 +146,32 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesLikeExist(int filmId, int userId) {
         String sql = "SELECT COUNT(*) FROM likes WHERE user_id = ? AND film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, filmId}, Integer.class);
 
         return count > 0;
     }
 
     @Override
     public List<Film> getRecommendations(int userId) {
-        String sqlQuery = "SELECT l2.userId" +
-                "FROM likes AS l1" +
-                "JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID" +
-                "WHERE l1.USER_ID = 1 AND l1.USER_ID<>l2.USER_ID" +
-                "GROUP BY l1.USER_ID , l2.USER_ID" +
-                "ORDER BY coincidence DESC" +
+        String sqlQuery = "SELECT l2.user_Id " +
+                "FROM likes AS l1 " +
+                "JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
+                "WHERE l1.USER_ID = ? AND l1.USER_ID<>l2.USER_ID " +
+                "GROUP BY l1.USER_ID , l2.USER_ID " +
+                "ORDER BY COUNT(l1.film_id) DESC " +
                 "LIMIT 1";
-        int bestUserId = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+        Integer bestUserId = jdbcTemplate.queryForObject(sqlQuery, Integer.class, userId);
 
-        sqlQuery = "SELECT film_id FROM(" +
-                "SELECT film_id FROM likes" +
-                "WHERE USER_ID = ?" +
-                "EXCEPT" +
-                "SELECT\tfilm_id FROM likes" +
-                "WHERE USER_ID = ?)";
+        sqlQuery = "SELECT * FROM film LEFT JOIN rating ON film.rating_id = rating.rating_id " +
+                "RIGHT JOIN (SELECT film_id FROM( " +
+                "SELECT film_id FROM likes " +
+                "WHERE USER_ID = ? " +
+                "EXCEPT " +
+                "SELECT film_id FROM likes " +
+                "WHERE USER_ID = ?)) AS r ON r.film_id = film.film_id";
 
         List<Film> recommendationsFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUserId, userId);
+
         if (!recommendationsFilms.isEmpty()) {
             for (Film f : recommendationsFilms) {
                 if (!getGenresByFilmId(f.getId()).isEmpty()) {
@@ -179,10 +180,9 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
         return recommendationsFilms;
-
     }
 
-    private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -197,7 +197,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))

@@ -60,7 +60,7 @@ public class UserController extends AbstractController<User>{
 
 
     @GetMapping(value = "/{id}/recommendations")
-    public List<Film> getRecomendations(@PathVariable(value = "id") Integer userId) {
+    public List<Film> getRecommendations(@PathVariable(value = "id") Integer userId) {
         return userService.getRecommendations(userId);
     }
 
