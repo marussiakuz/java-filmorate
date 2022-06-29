@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.liquibase.enabled=false",
         "spring.flyway.enabled=false"
 })
-
 @AutoConfigureMockMvc
 class FilmControllerTest {
 

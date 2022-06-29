@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.validation.constraints.*;
 
+import ru.yandex.practicum.filmorate.model.serializers.DurationSerializer;
 import ru.yandex.practicum.filmorate.validators.IsAfter;
 
 import java.time.Duration;

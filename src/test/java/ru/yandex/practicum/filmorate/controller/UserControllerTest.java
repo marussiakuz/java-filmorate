@@ -6,12 +6,15 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -29,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.liquibase.enabled=false",
         "spring.flyway.enabled=false"
 })
-
+@AutoConfigureTestDatabase
+@Sql({"/schema.sql", "/test-data.sql"})
 @AutoConfigureMockMvc
 class UserControllerTest {
 
@@ -41,6 +45,10 @@ class UserControllerTest {
     @Qualifier("userDbStorage")
     @Autowired
     private UserStorage userStorage;
+
+    @Qualifier("eventDbStorage")
+    @Autowired
+    private EventStorage eventStorage;
 
     @Autowired
     private ObjectMapper mapper;
