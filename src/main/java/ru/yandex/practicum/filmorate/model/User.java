@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,6 +27,8 @@ public class User {
 
     private Integer id;
     private String name;
+
+    @JsonIgnore
     private final Map<Integer, Boolean> friends = new HashMap<>();
 
     @NotNull(message = "Email may not be null")
@@ -54,4 +57,6 @@ public class User {
     public Set<Integer> getFriends() {
         return friends.keySet();
     }
+
+
 }

@@ -14,6 +14,9 @@ public interface FilmStorage {    // управление списком фил�
     public void addLike(int filmId, int userId);
     public void deleteLike(int filmId, int userId);
     public List<Film> getMostPopularFilms(int count);
+
+    List<Film> getCommonFilms(int user_id, int friend_id);
+
     public boolean doesFilmExist(int id);
     public boolean doesLikeExist(int filmId, int userId);
 
