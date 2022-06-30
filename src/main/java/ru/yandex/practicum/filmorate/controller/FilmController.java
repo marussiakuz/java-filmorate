@@ -61,4 +61,9 @@ public class FilmController extends AbstractController<Film> {
     public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
+
+    @GetMapping(value = "/director")
+    public List<Film> search(@RequestParam Integer userId, Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }

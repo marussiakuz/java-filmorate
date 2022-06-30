@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS friendship (
     FOREIGN KEY (friend_id)  REFERENCES users (user_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS director (
+                                      director_id INT PRIMARY KEY AUTO_INCREMENT,
+                                      director_name VARCHAR(100)
+);
+
 CREATE TABLE IF NOT EXISTS rating (
     rating_id INT PRIMARY KEY AUTO_INCREMENT,
     name_rating VARCHAR(30)
@@ -37,6 +42,8 @@ CREATE TABLE IF NOT EXISTS film (
     release_date DATE,
     duration INT,
     rating_id INT,
+    director_id varchar(100),
+    FOREIGN KEY (director_id)  REFERENCES director (director_id) ON DELETE CASCADE,
     FOREIGN KEY (rating_id)  REFERENCES rating (rating_id) ON DELETE CASCADE
 );
 
