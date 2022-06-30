@@ -123,6 +123,9 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilmFoYearFoGenre(int year,int genre,int count){
+        if(year<0||genre<0||count<0){
+            throw new FilmNotFoundException("negative param");
+        }
        return filmStorage.getPopularFilmFoYearFoGenre(year,genre,count);
     }
 }

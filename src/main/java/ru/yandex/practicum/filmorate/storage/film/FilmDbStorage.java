@@ -209,12 +209,31 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getPopularFilmFoYearFoGenre(int year, int genre, int count) {
-        String sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
-                " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
-                "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
-                " FILM_ID as id from LIKES  group by FILM_ID)\n" +
-                "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s AND" +
-                " FG.GENRE_ID=%s LIMIT %s", year, genre, count);
+        String sql="";
+        if(year==0&&genre!=0){
+             sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE " +
+                    " FG.GENRE_ID=%s LIMIT %s",  genre, count);
+        }
+        if(genre==0&&year!=0){
+             sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s " +
+                    "  LIMIT %s", year, count);
+        }
+        if(genre!=0&&year!=0){
+             sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s AND" +
+                    " FG.GENRE_ID=%s LIMIT %s", year, genre, count);
+        }
         List<Film> foYear = jdbcTemplate.query(sql, this::mapRowToFilm);
         foYear.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
         return foYear;

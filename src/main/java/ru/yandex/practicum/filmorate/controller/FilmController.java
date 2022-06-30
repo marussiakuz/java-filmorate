@@ -53,7 +53,7 @@ public class FilmController extends AbstractController<Film> {
                                       @RequestParam(value="genreId",defaultValue = "0",required = false) int genreId,
                                       @RequestParam(value="year",defaultValue = "0",required = false) int year) {
 
-        if (year != 0) {
+        if (year != 0||genreId!=0) {
             return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
         }
         return filmService.getMostPopularFilms(count);
