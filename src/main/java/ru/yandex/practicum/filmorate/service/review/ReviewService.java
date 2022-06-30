@@ -58,8 +58,13 @@ public class ReviewService {
         reviewsStorage.update(review);
         log.debug(String.format("review data with id=%s has been successfully updated", review.getId()));
 
-        eventStorage.addUpdateEvent(review.getUserId(), review.getId(), EventType.REVIEW);
-        log.debug(String.format("the update review event was completed successfully"));
+        Optional<Review> optionalReview = reviewsStorage.getReviewById(review.getId());
+        if (optionalReview.isEmpty())
+            throw new ReviewNotFoundException(String.format("Review with id=%s not found", review.getId()));
+        Review updatedReview = optionalReview.get();
+
+        eventStorage.addUpdateEvent(updatedReview.getUserId(), updatedReview.getId(), EventType.REVIEW);
+        log.debug("the update review event was completed successfully");
 
         return review;
     }
