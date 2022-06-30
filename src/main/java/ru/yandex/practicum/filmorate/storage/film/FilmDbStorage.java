@@ -224,7 +224,7 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
                     " FILM_ID as id from LIKES  group by FILM_ID)\n" +
                     "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s " +
-                    "  LIMIT %s", year, count);
+                    "  LIMIT %s", year, 1);
         }
         if(genre!=0&&year!=0){
              sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
