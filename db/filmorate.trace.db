@@ -1,4 +1,0 @@
-2022-06-30 16:27:51 jdbc[13]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "EVENT" не найдена
-Table "EVENT" not found; SQL statement:
-select * from event [42102-212]
