@@ -81,4 +81,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteFilmByIdStorage(int filmId) {
 
     }
+
+    @Override
+    public List<Film> getPopularFilmFoYearFoGenre(int year, int genre, int count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
 }
