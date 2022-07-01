@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 
+import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -60,6 +61,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(int user_id, int friend_id) {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public boolean doesFilmExist(int filmId) {
         return films.containsKey(filmId);
     }
@@ -73,4 +79,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     }
+
+    @Override
+    public void deleteFilmByIdStorage(int filmId) {
+
+    }
+
+    @Override
+    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
+        return null;
+    }
+
+
+}
 

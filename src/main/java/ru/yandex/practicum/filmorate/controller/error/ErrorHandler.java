@@ -26,12 +26,17 @@ public class ErrorHandler {
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class,
             GenreNotFoundException.class, RatingNotFoundException.class,DirectorNotFoundException.class,DirectorNotFoundException.class})
+            GenreNotFoundException.class, RatingNotFoundException.class, ReviewNotFoundException.class,
+            DislikeNotFoundException.class})
+            GenreNotFoundException.class, RatingNotFoundException.class,DirectorNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         if (e instanceof FilmNotFoundException) return new ErrorResponse("Film not found");
         else if (e instanceof LikeNotFoundException) return new ErrorResponse("Like not found");
         else if (e instanceof RatingNotFoundException) return new ErrorResponse("Rating not found");
         else if (e instanceof GenreNotFoundException) return new ErrorResponse("Genre not found");
+        else if (e instanceof ReviewNotFoundException) return new ErrorResponse("Review not found");
+        else if (e instanceof DislikeNotFoundException) return new ErrorResponse("Dislike not found");
         else if (e instanceof DirectorNotFoundException) return new ErrorResponse("Director not found");
         return new ErrorResponse("User not found");
     }
@@ -40,5 +45,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleExceptions(final RuntimeException e) {
         return new ErrorResponse("Unknown error");
+    }
+
+    @ExceptionHandler({UserIsNullException.class, FilmIsNullException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final NullPointerException e) {
+        if (e instanceof FilmIsNullException) return new ErrorResponse("Film not specified");
+        else if (e instanceof UserIsNullException) return new ErrorResponse("User not specified");
+        return new ErrorResponse("Entity not specified");
     }
 }
