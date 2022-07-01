@@ -16,4 +16,5 @@ public interface FilmStorage {    // управление списком фил�
     public List<Film> getMostPopularFilms(int count);
     public boolean doesFilmExist(int id);
     public boolean doesLikeExist(int filmId, int userId);
+
 }

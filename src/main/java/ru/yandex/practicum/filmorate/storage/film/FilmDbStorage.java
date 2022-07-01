@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.filmorate.model.Director;
@@ -135,7 +136,6 @@ public class FilmDbStorage implements FilmStorage {
 
         return count > 0;
     }
-
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
@@ -210,4 +210,5 @@ public class FilmDbStorage implements FilmStorage {
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
     }
+
 }

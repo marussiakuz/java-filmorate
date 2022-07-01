@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import javax.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +20,14 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
+    private final DirectorStorage directorStorage;
+
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                        @Qualifier("directorDbStorage") DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.directorStorage = directorStorage;
     }
 
     public List<Film> getAllFilms() {
@@ -77,6 +81,28 @@ public class FilmService {
 
     public List<Film> getMostPopularFilms(int count) {
         return filmStorage.getMostPopularFilms(count);
+    }
+
+    public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
+        if (param.isEmpty()) throw new ValidationException("Attempt to get sorted films with " +
+                "empty parameter");
+        if (!directorStorage.isDirectorExists(directorId)) throw new DirectorNotFoundException(
+                String.format("Attempt to get sorted films with absent director id = %d", directorId));
+
+        String sortParameter = param.get().trim().toLowerCase();
+        switch (sortParameter) {
+            case "year": {
+                List<Film> films = directorStorage.getMostFilmsYear(directorId);
+                return films;
+            }
+            case "likes": {
+                List<Film> films = directorStorage.getMostFilmsLiks(directorId);
+                return films;
+            }
+            default:
+                throw new DirectorNotFoundException(String.format("Attempt to get sorted films with " +
+                        "unknown parameter = %s", sortParameter));
+        }
     }
 
     private void validateFilm(int filmId) {

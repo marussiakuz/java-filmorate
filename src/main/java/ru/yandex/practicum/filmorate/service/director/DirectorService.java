@@ -20,8 +20,8 @@ public class DirectorService {
     }
 
     public Director add(Director director) {
-        if (director.getId() == null)
-            throw new DirectorNotFoundException(String.format("Director with id=%s already exists", director.getId()));
+        if (director.getName().isEmpty())
+            throw new DirectorNotFoundException(String.format("You can't add a director with an empty name"));
 
         directorStorage.add(director);
         log.debug(String.format("new director with id=%s added successfully", director.getId()));
@@ -35,7 +35,7 @@ public class DirectorService {
     }
 
     public Director update(Director director) {
-        if (director.getId() != null && directorStorage.doesDirectorExist(director.getId()))
+        validate(director.getId());
         directorStorage.update(director);
         log.debug(String.format("director with id=%s have been successfully updated", director.getId()));
 
@@ -55,4 +55,6 @@ public class DirectorService {
         if (!directorStorage.doesDirectorExist(id))
             throw new DirectorNotFoundException(String.format("Director with id=%s not found", id));
     }
+
+
 }

@@ -17,11 +17,8 @@ import java.util.Map;
 public class Director {
 
     private Integer id;
+    @NotNull(message = "Title may not be null")
+    @NotBlank(message = "Title may not be blank")
     private String name;
 
-    public Map<String, Object> toMap() {
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", name);
-        return values;
-    }
 }

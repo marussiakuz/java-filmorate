@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
@@ -50,5 +51,10 @@ public class FilmController extends AbstractController<Film> {
     @GetMapping(value = "/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getMostPopularFilms(count);
+    }
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
+                                                     @RequestParam Optional<String> sortBy) {
+        return filmService.getSortedFilmsByDirectorId(directorId, sortBy);
     }
 }

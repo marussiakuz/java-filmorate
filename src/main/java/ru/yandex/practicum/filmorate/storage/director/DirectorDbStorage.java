@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -10,19 +9,27 @@ import ru.yandex.practicum.filmorate.exceptions.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.rating.RatingDbStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 @Component("directorDbStorage")
 public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final RatingDbStorage ratingDbStorage;
+    private final GenreDbStorage genreDbStorage;
 
-    public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
+
+    public DirectorDbStorage(JdbcTemplate jdbcTemplate, RatingDbStorage ratingDbStorage, GenreDbStorage genreDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.ratingDbStorage = ratingDbStorage;
+        this.genreDbStorage = genreDbStorage;
     }
 
     @Override
@@ -55,7 +62,7 @@ public class DirectorDbStorage implements DirectorStorage {
             jdbcTemplate.update(sqlQuery,
                     director.getName(),
                     director.getId());
-        }else throw new DirectorNotFoundException(String.format("Attempt to update the director using " +
+        } else throw new DirectorNotFoundException(String.format("Attempt to update the director using " +
                 "missing id = %d", director.getId()));
     }
 
@@ -75,8 +82,6 @@ public class DirectorDbStorage implements DirectorStorage {
                 "missing id = %d", id));
     }
 
-
-
     @Override
     public boolean doesDirectorExist(int directorId) {
         String sql = "SELECT COUNT(*) FROM DIRECTOR WHERE director_id = ?";
@@ -86,10 +91,55 @@ public class DirectorDbStorage implements DirectorStorage {
         return count > 0;
     }
 
+    public List<Film> getMostFilmsYear(int count) {
+        String sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.rate_id " +
+                "FROM FILM AS f " +
+                "LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id " +
+                "WHERE fd.director_id = ? " +
+                "ORDER BY f.release_Date;";
+        List<Film> yearFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        yearFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        return yearFilms;
+    }
+
+
+    public  List<Film> getMostFilmsLiks(int count) {
+        String sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.rate_id \" +\n" +
+                "                \"FROM FILM AS f \" +\n" +
+                "                \"LEFT JOIN LIKES AS l ON f.film_id = l.film_id \" +\n" +
+                "                \"LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id \" +\n" +
+                "                \"WHERE fd.director_id = ? \" +\n" +
+                "                \"GROUP BY f.FILM_ID \" +\n" +
+                "                \"ORDER BY COUNT(l.FILM_ID) DESC;";
+        List<Film> liksFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        liksFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        return liksFilms;
+    }
+
+    private List<Genre> getGenresByFilmId(int filmId) {
+        String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
+                "USING(genre_id)";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
+    }
     public boolean thereIsDirector(int id) {
         String sql = "SELECT * FROM DIRECTOR WHERE director_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.next();
+    }
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+        int filmId = resultSet.getInt("film_id");
+        return Film.builder()
+                .id(filmId)
+                .name(resultSet.getString("title"))
+                .description(resultSet.getString("description"))
+                .releaseDate(resultSet.getDate("release_date").toLocalDate())
+                .duration(Duration.ofMinutes(resultSet.getLong("duration")))
+                .mpa(Rating.builder()
+                        .id(resultSet.getInt("rating_id"))
+                        .name(resultSet.getString("name_rating"))
+                        .build())
+                .build();
     }
 
     private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
@@ -98,5 +148,15 @@ public class DirectorDbStorage implements DirectorStorage {
                 .name(resultSet.getString("name_director"))
                 .build();
     }
-
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("genre_id"))
+                .name(resultSet.getString("name_genre"))
+                .build();
+    }
+    public  boolean isDirectorExists(Integer id) {
+        String sql = "SELECT director_name FROM directors WHERE director_id = ?";
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
+        return userRows.next();
+    }
 }
