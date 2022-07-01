@@ -218,20 +218,19 @@ public class FilmDbStorage implements FilmStorage {
                 }
             }
             if (title.get().contains("director")) {
-                sql = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN" +
-                        " DIRECTOR D on FILM.DIRECTOR_ID = D.DIRECTOR_ID\n" +
-                        "         where  DIRECTOR_NAME LIKE '%s'", "%" + query.get() + "%");
+                sql = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN FILM_DIRECTOR FD on FILM.FILM_ID = FD.FILM_ID LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID\n" +
+                        "         where  NAME_DIRECTOR LIKE '%s'", "%" + query.get() + "%");
             }
             if (title.get().size() == 2) {
                 if (title.get().contains("title") && title.get().contains("director")) {
                     String sqlTitle = String.format("SELECT * From FILM left join RATING R " +
                             "on FILM.RATING_ID = R.RATING_ID " + " where TITLE LIKE  '%s'", "%" + query.get() + "%");
-                    String sqlDirector = String.format("SELECT * From FILM left join RATING R on " +
-                            "FILM.RATING_ID = R.RATING_ID LEFT JOIN DIRECTOR D on FILM.DIRECTOR_ID = D.DIRECTOR_ID\n" +
-                            "         where  DIRECTOR_NAME LIKE '%s'", "%" + query.get() + "%");
+                    String sqlDirector = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN FILM_DIRECTOR FD on FILM.FILM_ID = FD.FILM_ID LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID\n" +
+                            "         where  NAME_DIRECTOR LIKE '%s'", "%" + query.get() + "%");
                     List<Film> searchAll = jdbcTemplate.query(sqlTitle, this::mapRowToFilm);
                     searchAll.addAll(jdbcTemplate.query(sqlDirector, this::mapRowToFilm));
                     searchAll.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+                   // searchAll.forEach(film -> film.setDirectors(addDirectorToTheFilm(film)));
                     return searchAll;
                 }
             }

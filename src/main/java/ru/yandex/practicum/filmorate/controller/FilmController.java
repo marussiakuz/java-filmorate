@@ -64,7 +64,7 @@ public class FilmController extends AbstractController<Film> {
         return filmService.getCommonFilms(userId, friendId);
     }
 
-    @GetMapping(value = "/director")
+    @GetMapping(value = "/search")
     public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
                              @RequestParam(value = "by", required = false) Optional<List<String>> title) {
         if (query.isEmpty() && title.isEmpty()) {
