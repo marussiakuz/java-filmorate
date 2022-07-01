@@ -121,4 +121,8 @@ public class FilmService {
             throw new UserNotFoundException(String.format("User with id=%s not found", friendId));
         return filmStorage.getCommonFilms(userId, friendId);
     }
+
+    public List<Film> search(Optional<String> query,Optional <List<String>> title) {
+      return   filmStorage.search(query,title);
+    }
 }

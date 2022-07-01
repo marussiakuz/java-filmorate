@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
@@ -63,7 +65,11 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/director")
-    public List<Film> search(@RequestParam Integer userId, Integer friendId) {
-        return filmService.getCommonFilms(userId, friendId);
+    public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
+                             @RequestParam(value = "by", required = false) Optional<List<String>> title) {
+        if (query.isEmpty() && title.isEmpty()) {
+            return filmService.getMostPopularFilms(100);
+        }
+        return filmService.search(query, title);
     }
 }

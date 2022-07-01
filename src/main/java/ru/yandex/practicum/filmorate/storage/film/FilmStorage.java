@@ -21,4 +21,6 @@ public interface FilmStorage {    // управление списком фил�
     public boolean doesLikeExist(int filmId, int userId);
 
     public void deleteFilmByIdStorage(int filmId);
+     List<Film> search(Optional<String> query, Optional<List<String>> title);
+
 }
