@@ -3,10 +3,14 @@ DROP TABLE IF EXISTS film_genre;
 DROP TABLE IF EXISTS genre;
 DROP TABLE IF EXISTS friendship;
 DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS review_usefulness;
+DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS film;
-DROP TABLE IF EXISTS rating;
 DROP TABLE IF EXISTS director;
+DROP TABLE IF EXISTS rating;
+
 
 CREATE TABLE IF NOT EXISTS users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -69,3 +73,32 @@ CREATE TABLE IF NOT EXISTS film_director (
     FOREIGN KEY (film_id)  REFERENCES film (film_id) ON DELETE CASCADE,
     FOREIGN KEY (director_id)  REFERENCES director (director_id) ON DELETE CASCADE
     );
+
+CREATE TABLE IF NOT EXISTS review (
+                                      review_id INT PRIMARY KEY AUTO_INCREMENT,
+                                      review_content TEXT,
+                                      is_positive BOOLEAN,
+                                      user_id INT,
+                                      film_id INT,
+                                      FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE,
+                                      FOREIGN KEY (film_id)  REFERENCES film (film_id) ON DELETE CASCADE
+);
+
+-- в таблице review_usefulness хранятся лайки / дизлайки (лайк = 1, дизлайк = -1)
+CREATE TABLE IF NOT EXISTS review_usefulness (
+                                                 review_id INT,
+                                                 user_id INT,
+                                                 like_dislike INT NOT NULL DEFAULT 0,
+                                                 FOREIGN KEY (review_id)  REFERENCES review (review_id) ON DELETE CASCADE,
+                                                 FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS events (
+                                      event_id INT PRIMARY KEY AUTO_INCREMENT,
+                                      user_id INT,
+                                      entity_id INT,
+                                      event_type VARCHAR(6),
+                                      operation VARCHAR(6),
+                                      time_stamp BIGINT,
+                                      FOREIGN KEY (user_id)  REFERENCES users (user_id) ON DELETE CASCADE
+);
