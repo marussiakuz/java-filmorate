@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -25,9 +24,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureTestDatabase
@@ -59,7 +56,7 @@ class FilmControllerTest {
     @BeforeEach
     private void beforeEach() {
         film = new Film();
-        film.setId(1);
+        film.setId(6);
         film.setName("Film");
         film.setDescription("Comedy");
         film.setDuration(Duration.ofMinutes(130));
@@ -172,21 +169,22 @@ class FilmControllerTest {
 
     @Test
     void getCommonFilms() throws Exception {
-        String user1 = "{\"login\": \"dolore\", \"name\": \"Nick Name\", \"email\": \"mail@mail.ru\", \"birthday\": \"1946-08-20\"}";
-        String user2 = "{\"login\": \"dolores\", \"name\": \"Nick Names\", \"email\": \"mail@gmail.ru\", \"birthday\": \"1946-08-20\"}";
-        String user3 = "{\"login\": \"dolorez\", \"name\": \"Nick Namez\", \"email\": \"mail@imail.ru\", \"birthday\": \"1946-08-20\"}";
-        String film1 = "{\"name\": \"labore nulla\", \"releaseDate\": \"1979-04-17\",\"description\": " +
-                "\"Duis in consequat esse\", \"duration\": 100, \"rate\": 4, \"mpa\": { \"id\": 1}}";
-        String film2 = "{\"name\": \"new film\", \"releaseDate\": \"1979-04-17\",\"description\": " +
-                "\"Duis in consequat esse\", \"duration\": 100, \"rate\": 4, \"mpa\": { \"id\": 1}}";
+        String user1 = "{\"login\": \"dolore\", \"name\": \"Nick Name\", \"email\": \"mail@mail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
+        String user2 = "{\"login\": \"dolores\", \"name\": \"Nick Names\", \"email\": \"mail@gmail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
+        String user3 = "{\"login\": \"dolorez\", \"name\": \"Nick Namez\", \"email\": \"mail@imail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(film1)))
+                        .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
+        film.setId(7);
+        film.setName("NewFilm");
         mockMvc.perform(post("/films")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(film2)))
+                        .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
         mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -212,10 +210,64 @@ class FilmControllerTest {
                 .andExpect(status().isOk());
         mockMvc.perform(get("/films/common?userId=1&friendId=2"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/films/common?userId=5&friendId=2"))
+        mockMvc.perform(get("/films/common?userId=55&friendId=2"))
                 .andExpect(status().isNotFound());
         assertEquals(2, filmStorage.getCommonFilms(1, 2).size());
         assertEquals(2, filmStorage.getCommonFilms(1, 2).get(0).getId());
         assertEquals(1, filmStorage.getCommonFilms(1, 2).get(1).getId());
+    }
+
+    @Test
+    void getRecommendations() throws Exception {
+
+        String user1 = "{\"login\": \"dolore\", \"name\": \"Nick Name\", \"email\": \"mail@mail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
+        String user2 = "{\"login\": \"dolores\", \"name\": \"Nick Names\", \"email\": \"mail@gmail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
+        String user3 = "{\"login\": \"dolorez\", \"name\": \"Nick Namez\", \"email\": \"mail@imail.ru\", " +
+                "\"birthday\": \"1946-08-20\"}";
+
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+        film.setId(7);
+        film.setName("NewFilm");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(film)))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(user1))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(user2))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/users/6/recommendations"))
+                .andExpect(status().isOk());
+
+//        mockMvc.perform(post("/users")
+//                        .contentType("application/json")
+//                        .content(user3))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(put("/films/1/like/1"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(put("/films/1/like/2"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(put("/films/2/like/1"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(put("/films/2/like/2"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(put("/films/2/like/3"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(get("/films/common?userId=1&friendId=2"))
+//                .andExpect(status().isOk());
+//        mockMvc.perform(get("/films/common?userId=55&friendId=2"))
+//                .andExpect(status().isNotFound());
+//        assertEquals(2, filmStorage.getCommonFilms(1, 2).size());
+//        assertEquals(2, filmStorage.getCommonFilms(1, 2).get(0).getId());
+//        assertEquals(1, filmStorage.getCommonFilms(1, 2).get(1).getId());
     }
 }
