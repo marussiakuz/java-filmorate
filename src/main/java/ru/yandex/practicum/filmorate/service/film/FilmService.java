@@ -33,8 +33,7 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage,
-                        @Qualifier("directorDbStorage") DirectorStorage directorStorage) {
+                        @Qualifier("directorDbStorage") DirectorStorage directorStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("ratingDbStorage")RatingStorage ratingStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage) {
