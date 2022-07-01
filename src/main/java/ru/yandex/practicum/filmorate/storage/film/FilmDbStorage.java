@@ -5,6 +5,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -51,8 +52,10 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
 
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-
         if (film.getGenres() != null) addGenresToTheFilm(film);
+
+        film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        if (film.getDirectors() != null) addDirectorToTheFilm(film);
     }
 
     @Override
@@ -82,7 +85,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
-            film.setGenres(genres.isEmpty()? null : genres);
+            film.setGenres(genres.isEmpty() ? null : genres);
         }
 
         return Optional.ofNullable(film);
@@ -119,7 +122,7 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
 
         return count > 0;
     }
@@ -128,12 +131,12 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesLikeExist(int filmId, int userId) {
         String sql = "SELECT COUNT(*) FROM likes WHERE user_id = ? AND film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, filmId}, Integer.class);
 
         return count > 0;
     }
 
-    private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -148,10 +151,17 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))
+                .build();
+    }
+
+    private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
+        return Director.builder()
+                .id(resultSet.getInt("director_id"))
+                .name(resultSet.getString("name_director"))
                 .build();
     }
 
@@ -175,9 +185,29 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenresByFilmId(film.getId()));
     }
 
+    private void addDirectorToTheFilm(Film film) {
+        if (film.getDirectors() == null || film.getDirectors().isEmpty()) return;
+
+        String sqlQuery = "INSERT INTO film_director(film_id, director_id) SELECT ?, ?";
+
+        film.getDirectors().stream()
+                .mapToInt(Director::getId)
+                .distinct()
+                .forEach(directorId -> jdbcTemplate.update(sqlQuery, film.getId(), directorId));
+
+        film.setDirectors(getDirectorsByFilmId(film.getId()));
+    }
+
     private void deleteGenresByFilmId(int filmId) {
         String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    private List<Director> getDirectorsByFilmId(int filmId) {
+        String sqlQuery = "SELECT * FROM director RIGHT JOIN (SELECT director_id FROM film_director WHERE film_id = ?) " +
+                "USING(director_id)";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
     }
 }

@@ -53,6 +53,8 @@ public class Film {
 
     private Rating mpa;
     private List<Genre> genres;
+    private List<Director> directors;
+
 
     public void addLike(Integer userId){
         likes.add(userId);

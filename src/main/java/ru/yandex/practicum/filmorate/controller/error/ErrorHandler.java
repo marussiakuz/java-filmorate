@@ -25,13 +25,14 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class,
-            GenreNotFoundException.class, RatingNotFoundException.class})
+            GenreNotFoundException.class, RatingNotFoundException.class,DirectorNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         if (e instanceof FilmNotFoundException) return new ErrorResponse("Film not found");
         else if (e instanceof LikeNotFoundException) return new ErrorResponse("Like not found");
         else if (e instanceof RatingNotFoundException) return new ErrorResponse("Rating not found");
         else if (e instanceof GenreNotFoundException) return new ErrorResponse("Genre not found");
+        else if (e instanceof DirectorNotFoundException) return new ErrorResponse("Director not found");
         return new ErrorResponse("User not found");
     }
 
