@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -120,6 +121,25 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(int user_id, int friend_id) {
+
+        String sqlQuery = "SELECT * FROM film LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
+                "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT " +
+                "JOIN  likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
+                "WHERE l1.user_id = ? AND l2.user_id = ? ORDER BY count_like DESC";
+
+        List<Film> commonFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, user_id, friend_id);
+        if (!commonFilms.isEmpty()) {
+            for (Film f : commonFilms) {
+                if (!getGenresByFilmId(f.getId()).isEmpty()) {
+                    f.setGenres(getGenresByFilmId(f.getId()));
+                }
+            }
+        }
+        return commonFilms;
+    }
+
+    @Override
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
@@ -136,6 +156,8 @@ public class FilmDbStorage implements FilmStorage {
 
         return count > 0;
     }
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
@@ -164,6 +186,7 @@ public class FilmDbStorage implements FilmStorage {
                 .name(resultSet.getString("name_director"))
                 .build();
     }
+
 
     private List<Genre> getGenresByFilmId(int filmId) {
         String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
@@ -200,8 +223,47 @@ public class FilmDbStorage implements FilmStorage {
 
     private void deleteGenresByFilmId(int filmId) {
         String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
-
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public void deleteFilmByIdStorage(int filmId) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
+        String sql = "";
+        if (query.isPresent() && title.isPresent()) {
+            if (title.get().size() == 1) {
+                if (title.get().contains("title")) {
+                    sql = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID " +
+                            " where TITLE LIKE  '%s'", "%" + query.get() + "%");
+                }
+            }
+            if (title.get().contains("director")) {
+                sql = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN FILM_DIRECTOR FD on FILM.FILM_ID = FD.FILM_ID LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID\n" +
+                        "         where  NAME_DIRECTOR LIKE '%s'", "%" + query.get() + "%");
+            }
+            if (title.get().size() == 2) {
+                if (title.get().contains("title") && title.get().contains("director")) {
+                    String sqlTitle = String.format("SELECT * From FILM left join RATING R " +
+                            "on FILM.RATING_ID = R.RATING_ID " + " where TITLE LIKE  '%s'", "%" + query.get() + "%");
+                    String sqlDirector = String.format("SELECT * From FILM left join RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN FILM_DIRECTOR FD on FILM.FILM_ID = FD.FILM_ID LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID\n" +
+                            "         where  NAME_DIRECTOR LIKE '%s'", "%" + query.get() + "%");
+                    List<Film> searchAll = jdbcTemplate.query(sqlTitle, this::mapRowToFilm);
+                    searchAll.addAll(jdbcTemplate.query(sqlDirector, this::mapRowToFilm));
+                    searchAll.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+                   // searchAll.forEach(film -> film.setDirectors(addDirectorToTheFilm(film)));
+                    return searchAll;
+                }
+            }
+        }
+
+        List<Film> search = jdbcTemplate.query(sql, this::mapRowToFilm);
+        search.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        return search;
     }
 
     private List<Director> getDirectorsByFilmId(int filmId) {

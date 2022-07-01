@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 import java.util.List;
@@ -51,6 +52,25 @@ public class FilmController extends AbstractController<Film> {
     @GetMapping(value = "/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getMostPopularFilms(count);
+    }
+
+    @DeleteMapping(value = "/{filmId}")
+    public void deleteFilmById(@PathVariable(value = "filmId") Integer filmId) {
+        filmService.deleteFilmByIdService(filmId);
+    }
+
+    @GetMapping(value = "/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping(value = "/search")
+    public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
+                             @RequestParam(value = "by", required = false) Optional<List<String>> title) {
+        if (query.isEmpty() && title.isEmpty()) {
+            return filmService.getMostPopularFilms(100);
+        }
+        return filmService.search(query, title);
     }
     @GetMapping("/director/{directorId}")
     public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
