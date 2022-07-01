@@ -21,4 +21,5 @@ public interface FilmStorage {    // управление списком фил�
     public boolean doesLikeExist(int filmId, int userId);
 
     public void deleteFilmByIdStorage(int filmId);
+    List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year,Optional<Integer> genre,Optional<Integer> count);
 }

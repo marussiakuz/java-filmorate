@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,7 +84,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
-            film.setGenres(genres.isEmpty()? null : genres);
+            film.setGenres(genres.isEmpty() ? null : genres);
         }
 
         return Optional.ofNullable(film);
@@ -138,7 +140,7 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesFilmExist(int filmId) {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
 
         return count > 0;
     }
@@ -147,12 +149,12 @@ public class FilmDbStorage implements FilmStorage {
     public boolean doesLikeExist(int filmId, int userId) {
         String sql = "SELECT COUNT(*) FROM likes WHERE user_id = ? AND film_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, filmId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, filmId}, Integer.class);
 
         return count > 0;
     }
 
-    private Film mapRowToFilm (ResultSet resultSet, int rowNum) throws SQLException {
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -167,13 +169,12 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))
                 .build();
     }
-
 
 
     private List<Genre> getGenresByFilmId(int filmId) {
@@ -202,8 +203,43 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmByIdStorage(int filmId){
+    public void deleteFilmByIdStorage(int filmId) {
         String sqlQuery = "DELETE FROM film WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        String sql = "";
+        int countt = 10;
+        if(count.isPresent()){
+            countt=count.get();
+        }
+        if (genre.isPresent() && year.isEmpty()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE " +
+                    " FG.GENRE_ID=%s LIMIT %s", genre.get(), countt);
+        }
+        if (genre.isEmpty() && year.isPresent()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s " +
+                    "  LIMIT %s", year.get(), 1);
+        }
+        if (genre.isPresent() && year.isPresent()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s AND" +
+                    " FG.GENRE_ID=%s LIMIT %s", year.get(), genre.get(), countt);
+        }
+        List<Film> foYear = jdbcTemplate.query(sql, this::mapRowToFilm);
+        foYear.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        return foYear;
     }
 }
