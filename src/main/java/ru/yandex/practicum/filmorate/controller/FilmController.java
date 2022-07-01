@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
@@ -49,14 +50,21 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(value="count",defaultValue = "10", required = false) int count,
-                                      @RequestParam(value="genreId",defaultValue = "0",required = false) int genreId,
-                                      @RequestParam(value="year",defaultValue = "0",required = false) int year) {
+    public List<Film> getPopularFilms(@RequestParam(value="count", required = false) Optional<Integer> count,
+                                      @RequestParam(value="genreId",required = false) Optional<Integer> genreId,
+                                      @RequestParam(value="year",required = false) Optional<Integer> year) {
 
-        if (year != 0||genreId!=0) {
+        if (genreId.isEmpty()&& year.isEmpty()&& count.isEmpty()) {
+            return filmService.getMostPopularFilms(10);
+
+        }
+        if(genreId.isEmpty()&& year.isEmpty()&& count.isPresent()){
+            return filmService.getMostPopularFilms(count.get());
+        }
+        else{
             return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
         }
-        return filmService.getMostPopularFilms(count);
+
     }
 
     @DeleteMapping(value = "/{filmId}")
