@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         films.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(getDirectorsByFilmId(film.getId())));
 
         return films;
     }
@@ -72,6 +74,14 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
 
+        if (film.getDirectors() != null) {
+            deleteDirectorsByFilmId(film.getId());
+            addDirectorToTheFilm(film);
+        }
+        if(film.getDirectors()==null){
+            deleteDirectorsByFilmId(film.getId());
+        }
+
         if (film.getGenres() != null) {
             deleteGenresByFilmId(film.getId());
             addGenresToTheFilm(film);
@@ -87,6 +97,10 @@ public class FilmDbStorage implements FilmStorage {
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
             film.setGenres(genres.isEmpty() ? null : genres);
+        }
+        if (film != null) {
+            List<Director> directors = getDirectorsByFilmId(id);
+            film.setDirectors(directors);
         }
 
         return Optional.ofNullable(film);
@@ -185,6 +199,8 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenresByFilmId(film.getId()));
     }
 
+
+
     private void addDirectorToTheFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) return;
 
@@ -204,11 +220,22 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, filmId);
     }
 
-    private List<Director> getDirectorsByFilmId(int filmId) {
+    private void deleteDirectorsByFilmId(int filmId) {
+        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE film_id = ?";
+
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    public List<Director> getDirectorsByFilmId(int filmId) {
         String sqlQuery = "SELECT * FROM director RIGHT JOIN (SELECT director_id FROM film_director WHERE film_id = ?) " +
                 "USING(director_id)";
-
-        return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
+        List<Director> directors = jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
+        if (directors == null) {
+            return new ArrayList<Director>();
+        }
+        return directors;
     }
+
+
 
 }

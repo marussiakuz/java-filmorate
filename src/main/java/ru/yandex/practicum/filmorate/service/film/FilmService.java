@@ -87,9 +87,9 @@ public class FilmService {
         if (param.isEmpty()) throw new ValidationException("Attempt to get sorted films with " +
                 "empty parameter");
         if (!directorStorage.isDirectorExists(directorId)) throw new DirectorNotFoundException(
-                String.format("Attempt to get sorted films with absent director id = %d", directorId));
+                String.format("Attempt to get sorted films with absent director id = %s", directorId));
 
-        String sortParameter = param.get().trim().toLowerCase();
+        String sortParameter = param.get();
         switch (sortParameter) {
             case "year": {
                 List<Film> films = directorStorage.getMostFilmsYear(directorId);

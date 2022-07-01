@@ -29,8 +29,9 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
-        return filmService.update(film);
+    public Film update(@Valid @RequestBody Film film) {
+        filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
+        return film;
     }
 
     @GetMapping(value = "/{id}")

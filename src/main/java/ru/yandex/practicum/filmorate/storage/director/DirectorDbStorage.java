@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingDbStorage;
 
@@ -18,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 @Component("directorDbStorage")
 public class DirectorDbStorage implements DirectorStorage {
@@ -25,11 +27,14 @@ public class DirectorDbStorage implements DirectorStorage {
     private final RatingDbStorage ratingDbStorage;
     private final GenreDbStorage genreDbStorage;
 
+    private final FilmDbStorage filmDbStorage;
 
-    public DirectorDbStorage(JdbcTemplate jdbcTemplate, RatingDbStorage ratingDbStorage, GenreDbStorage genreDbStorage) {
+
+    public DirectorDbStorage(JdbcTemplate jdbcTemplate, RatingDbStorage ratingDbStorage, GenreDbStorage genreDbStorage, FilmDbStorage filmDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.ratingDbStorage = ratingDbStorage;
         this.genreDbStorage = genreDbStorage;
+        this.filmDbStorage = filmDbStorage;
     }
 
     @Override
@@ -41,6 +46,7 @@ public class DirectorDbStorage implements DirectorStorage {
             stmt.setString(1, director.getName());
             return stmt;
         }, keyHolder);
+        director.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
     }
 
     @Override
@@ -91,28 +97,24 @@ public class DirectorDbStorage implements DirectorStorage {
         return count > 0;
     }
 
-    public List<Film> getMostFilmsYear(int count) {
-        String sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.rate_id " +
-                "FROM FILM AS f " +
-                "LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id " +
-                "WHERE fd.director_id = ? " +
-                "ORDER BY f.release_Date;";
-        List<Film> yearFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+public List<Film> getMostFilmsYear(int count) {
+
+        String sq = String.format("SELECT * FROM FILM AS f LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id left join RATING R on f.RATING_ID = R.RATING_ID WHERE fd.director_id = %s\n" +
+                "              ORDER BY f.release_Date",count);
+        List<Film> yearFilms = jdbcTemplate.query(sq, this::mapRowToFilm);
         yearFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        yearFilms.stream().map(Film::getGenres).filter(genres -> genres.size()==0).forEach(genres -> genres=null);
+        yearFilms.forEach(film -> film.setDirectors(filmDbStorage.getDirectorsByFilmId(film.getId())));
         return yearFilms;
     }
 
 
     public  List<Film> getMostFilmsLiks(int count) {
-        String sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.rate_id \" +\n" +
-                "                \"FROM FILM AS f \" +\n" +
-                "                \"LEFT JOIN LIKES AS l ON f.film_id = l.film_id \" +\n" +
-                "                \"LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id \" +\n" +
-                "                \"WHERE fd.director_id = ? \" +\n" +
-                "                \"GROUP BY f.FILM_ID \" +\n" +
-                "                \"ORDER BY COUNT(l.FILM_ID) DESC;";
-        List<Film> liksFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        String sq = String.format("SELECT * FROM FILM AS f LEFT JOIN LIKES AS l ON f.film_id = l.film_id LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id left join RATING R on f.RATING_ID = R.RATING_ID\n" +
+                "WHERE fd.director_id = %s GROUP BY f.FILM_ID ORDER BY COUNT(l.FILM_ID) DESC;",count);
+        List<Film> liksFilms = jdbcTemplate.query(sq, this::mapRowToFilm);
         liksFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        liksFilms.forEach(film -> filmDbStorage.getDirectorsByFilmId(film.getId()));
         return liksFilms;
     }
 
@@ -155,7 +157,7 @@ public class DirectorDbStorage implements DirectorStorage {
                 .build();
     }
     public  boolean isDirectorExists(Integer id) {
-        String sql = "SELECT director_name FROM directors WHERE director_id = ?";
+        String sql = "SELECT name_director FROM director WHERE director_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.next();
     }
