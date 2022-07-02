@@ -129,6 +129,7 @@ public class FilmDbStorage implements FilmStorage {
 
         popularFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
         popularFilms.forEach(film->film.setDirectors(getDirectorsByFilmId(film.getId())));
+
         return popularFilms;
     }
 
