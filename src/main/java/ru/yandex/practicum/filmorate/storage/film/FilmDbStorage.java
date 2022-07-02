@@ -170,6 +170,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+
         int filmId = resultSet.getInt("film_id");
         return Film.builder()
                 .id(filmId)
@@ -341,5 +342,41 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> foYear = jdbcTemplate.query(sql, this::mapRowToFilm);
         foYear.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
         return foYear;
+    }
+
+    @Override
+    public List<Film> getRecommendations(int userId) {
+        String sqlQuery = "SELECT l2.user_Id " +
+                "FROM likes AS l1 " +
+                "JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
+                "WHERE l1.USER_ID = ? AND l1.USER_ID<>l2.USER_ID " +
+                "GROUP BY l1.USER_ID , l2.USER_ID " +
+                "ORDER BY COUNT(l1.film_id) DESC " +
+                "LIMIT 1";
+
+        List<Integer> bestUsersId = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
+
+        if (bestUsersId.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        sqlQuery = "SELECT * FROM film LEFT JOIN rating ON film.rating_id = rating.rating_id " +
+                "RIGHT JOIN (SELECT film_id FROM( " +
+                "SELECT film_id FROM likes " +
+                "WHERE USER_ID = ? " +
+                "EXCEPT " +
+                "SELECT film_id FROM likes " +
+                "WHERE USER_ID = ?)) AS r ON r.film_id = film.film_id";
+
+        List<Film> recommendationsFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUsersId.get(0), userId);
+
+        if (!recommendationsFilms.isEmpty()) {
+            for (Film f : recommendationsFilms) {
+                if (!getGenresByFilmId(f.getId()).isEmpty()) {
+                    f.setGenres(getGenresByFilmId(f.getId()));
+                }
+            }
+        }
+        return recommendationsFilms;
     }
 }

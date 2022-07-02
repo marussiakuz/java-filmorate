@@ -16,7 +16,8 @@ public class InMemoryReviewsStorage implements ReviewsStorage {
     @Override
     public void add(Review review) {
         if (review.getId() == null || review.getId() == 0) {
-            if (reviews.isEmpty()) review.setId(1);
+            if (reviews.isEmpty())
+                review.setId(1);
             else {
                 int maxId = reviews.keySet().stream().max(Comparator.naturalOrder()).get();
                 review.setId(++maxId);

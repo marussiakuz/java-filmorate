@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.event;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
@@ -76,7 +75,7 @@ public class EventDbStorage implements EventStorage {
         return jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);
     }
 
-    private Event mapRowToEvent (ResultSet resultSet, int rowNum) throws SQLException {
+    private Event mapRowToEvent(ResultSet resultSet, int rowNum) throws SQLException {
         int eventId = resultSet.getInt("event_id");
         return Event.builder()
                 .id(eventId)

@@ -7,7 +7,7 @@ public enum Operation {
 
     private final String operation;
 
-    private Operation(String operation) {
+    Operation(String operation) {
         this.operation = operation;
     }
 

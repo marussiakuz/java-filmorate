@@ -7,7 +7,7 @@ public enum EventType {
 
     private final String eventType;
 
-    private EventType(String eventType) {
+    EventType(String eventType) {
         this.eventType = eventType;
     }
 

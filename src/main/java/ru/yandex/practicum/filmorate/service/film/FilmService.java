@@ -4,15 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
-
-import ru.yandex.practicum.filmorate.exceptions.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
@@ -33,7 +27,7 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                        @Qualifier("directorDbStorage") DirectorStorage directorStorage,
+                       @Qualifier("directorDbStorage") DirectorStorage directorStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("ratingDbStorage") RatingStorage ratingStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage) {
@@ -106,10 +100,12 @@ public class FilmService {
     }
 
     public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
-        if (param.isEmpty()) throw new ValidationException("Attempt to get sorted films with " +
-                "empty parameter");
-        if (!directorStorage.isDirectorExists(directorId)) throw new DirectorNotFoundException(
-                String.format("Attempt to get sorted films with absent director id = %s", directorId));
+        if (param.isEmpty())
+            throw new ValidationException("Attempt to get sorted films with " +
+                    "empty parameter");
+        if (!directorStorage.isDirectorExists(directorId))
+            throw new DirectorNotFoundException(
+                    String.format("Attempt to get sorted films with absent director id = %s", directorId));
 
         String sortParameter = param.get();
         switch (sortParameter) {
@@ -152,23 +148,24 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    public List<Film> search(Optional<String> query,Optional <List<String>> title) {
+    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
         return filmStorage.search(query, title);
     }
+
     public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
         if (year.isPresent()) {
-            if(year.get()<0) {
+            if (year.get() < 0) {
                 throw new FilmNotFoundException("negative param");
             }
-            if(year.get()>0&&year.get()<1895) {
+            if (year.get() > 0 && year.get() < 1895) {
                 throw new FilmNotFoundException("Release date may not be earlier than 28.12.1895");
             }
         }
-        if(genre.isPresent()){
-            if(genre.get()<0){
+        if (genre.isPresent()) {
+            if (genre.get() < 0) {
                 throw new FilmNotFoundException("negative param");
             }
-            if(genre.get()==0||genre.get()>6){
+            if (genre.get() == 0 || genre.get() > 6) {
                 throw new FilmNotFoundException("there is no such genre");
             }
         }

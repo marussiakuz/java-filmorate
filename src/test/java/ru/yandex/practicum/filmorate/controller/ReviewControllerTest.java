@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -79,7 +78,7 @@ class ReviewControllerTest {
         this.mockMvc.perform(post("/reviews")
                         .content(mapper.writeValueAsString(review))
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         review.setContent("not recommended");
         review.setPositive(false);
@@ -87,7 +86,7 @@ class ReviewControllerTest {
         this.mockMvc.perform(put("/reviews")
                         .content(mapper.writeValueAsString(review))
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         Optional<Review> optionalReview = reviewsStorage.getReviewById(1);
 
@@ -109,8 +108,8 @@ class ReviewControllerTest {
     @Test
     void putDeleteLikeAndPutDeleteDislike() throws Exception {
         this.mockMvc.perform(post("/reviews")
-                .content(mapper.writeValueAsString(review))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(mapper.writeValueAsString(review))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(put("/reviews/1/like/1"))
@@ -156,8 +155,8 @@ class ReviewControllerTest {
     @Test
     void getReviewsByFilmId() throws Exception {
         this.mockMvc.perform(post("/reviews")
-                .content(mapper.writeValueAsString(review))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(mapper.writeValueAsString(review))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(get("/reviews?filmId=1&count=5"))

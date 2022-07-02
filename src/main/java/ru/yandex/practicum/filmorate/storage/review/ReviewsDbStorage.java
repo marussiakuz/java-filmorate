@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.sql.PreparedStatement;
@@ -17,12 +16,11 @@ import java.util.Optional;
 @Component("reviewsDbStorage")
 public class ReviewsDbStorage implements ReviewsStorage {
 
+    private final JdbcTemplate jdbcTemplate;
+
     public ReviewsDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
-    private final JdbcTemplate jdbcTemplate;
-
 
     @Override
     public void add(Review review) {
@@ -124,7 +122,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public boolean doesLikeExist(int reviewId, int userId) {
         String sql = "SELECT COUNT(*) FROM review_usefulness WHERE review_id = ? AND user_id = ? AND like_dislike = 1";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { reviewId, userId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{reviewId, userId}, Integer.class);
 
         return count > 0;
     }
@@ -133,7 +131,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public boolean doesDislikeExist(int reviewId, int userId) {
         String sql = "SELECT COUNT(*) FROM review_usefulness WHERE review_id = ? AND user_id = ? AND like_dislike = -1";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { reviewId, userId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{reviewId, userId}, Integer.class);
 
         return count > 0;
     }
@@ -142,12 +140,12 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public boolean doesReviewExist(int id) {
         String sql = "SELECT COUNT(*) FROM review WHERE review_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { id }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class);
 
         return count > 0;
     }
 
-    private Review mapRowToReview (ResultSet resultSet, int rowNum) throws SQLException {
+    private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
         int reviewId = resultSet.getInt("review_id");
         return Review.builder()
                 .id(reviewId)
