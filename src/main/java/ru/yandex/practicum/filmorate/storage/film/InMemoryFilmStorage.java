@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
@@ -88,6 +89,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return null;
     }
 
-
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
 }
 

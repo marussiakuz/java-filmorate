@@ -16,8 +16,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDate;
+
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -96,8 +101,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film != null) {
             List<Genre> genres = getGenresByFilmId(id);
             film.setGenres(genres.isEmpty() ? null : genres);
-        }
-        if (film != null) {
+
             List<Director> directors = getDirectorsByFilmId(id);
             film.setDirectors(directors);
         }
@@ -168,40 +172,37 @@ public class FilmDbStorage implements FilmStorage {
 
         return count > 0;
     }
-
-
-        private Film mapRowToFilm (ResultSet resultSet,int rowNum) throws SQLException {
-            int filmId = resultSet.getInt("film_id");
-            return Film.builder()
-                    .id(filmId)
-                    .name(resultSet.getString("title"))
-                    .description(resultSet.getString("description"))
-                    .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                    .duration(Duration.ofMinutes(resultSet.getLong("duration")))
-                    .mpa(Rating.builder()
-                            .id(resultSet.getInt("rating_id"))
-                            .name(resultSet.getString("name_rating"))
-                            .build())
-                    .build();
-        }
-
-
-        private Genre mapRowToGenre (ResultSet resultSet,int rowNum) throws SQLException {
-            return Genre.builder()
-                    .id(resultSet.getInt("genre_id"))
-                    .name(resultSet.getString("name_genre"))
-                    .build();
-        }
-
-        private Director mapRowToDirector (ResultSet resultSet,int rowNum) throws SQLException {
+    
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+        int filmId = resultSet.getInt("film_id");
+        return Film.builder()
+                .id(filmId)
+                .name(resultSet.getString("title"))
+                .description(resultSet.getString("description"))
+                .releaseDate(resultSet.getDate("release_date").toLocalDate())
+                .duration(Duration.ofMinutes(resultSet.getLong("duration")))
+                .mpa(Rating.builder()
+                        .id(resultSet.getInt("rating_id"))
+                        .name(resultSet.getString("name_rating"))
+                        .build())
+                .build();
+    }
+    
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("genre_id"))
+                .name(resultSet.getString("name_genre"))
+                .build();
+    }
+    
+    private Director mapRowToDirector (ResultSet resultSet,int rowNum) throws SQLException {
             return Director.builder()
                     .id(resultSet.getInt("director_id"))
                     .name(resultSet.getString("name_director"))
                     .build();
-        }
-
-
-        private List<Genre> getGenresByFilmId ( int filmId){
+    }
+    
+    private List<Genre> getGenresByFilmId ( int filmId){
             String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
                     "USING(genre_id)";
 
@@ -306,8 +307,46 @@ public class FilmDbStorage implements FilmStorage {
                 }
                 return search;
             }
-
-
-
-
         }
+        
+    @Override
+    public void deleteFilmByIdStorage(int filmId) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        String sql = "";
+        int countt = 10;
+        if(count.isPresent()){
+            countt=count.get();
+        }
+        if (genre.isPresent() && year.isEmpty()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE " +
+                    " FG.GENRE_ID=%s LIMIT %s", genre.get(), countt);
+        }
+        if (genre.isEmpty() && year.isPresent()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s " +
+                    "  LIMIT %s", year.get(), 1);
+        }
+        if (genre.isPresent() && year.isPresent()) {
+            sql = String.format("SELECT *FROM FILM LEFT JOIN FILM_GENRE FG on FILM.FILM_ID = FG.FILM_ID" +
+                    " LEFT JOIN GENRE G2 on FG.GENRE_ID = G2.GENRE_ID\n" +
+                    "LEFT JOIN RATING R on FILM.RATING_ID = R.RATING_ID LEFT JOIN (SELECT count(USER_ID)," +
+                    " FILM_ID as id from LIKES  group by FILM_ID)\n" +
+                    "on FILM.FILM_ID = id WHERE  extract(YEAR FROM FILM.RELEASE_DATE)=%s AND" +
+                    " FG.GENRE_ID=%s LIMIT %s", year.get(), genre.get(), countt);
+        }
+        List<Film> foYear = jdbcTemplate.query(sql, this::mapRowToFilm);
+        foYear.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        return foYear;
+    }
+}

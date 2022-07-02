@@ -35,7 +35,7 @@ public class FilmService {
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                         @Qualifier("directorDbStorage") DirectorStorage directorStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("ratingDbStorage")RatingStorage ratingStorage,
+                       @Qualifier("ratingDbStorage") RatingStorage ratingStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
@@ -138,7 +138,7 @@ public class FilmService {
                     filmId, userId));
     }
 
-    public void deleteFilmByIdService(int filmId){
+    public void deleteFilmByIdService(int filmId) {
         validateFilm(filmId);
         filmStorage.deleteFilmByIdStorage(filmId);
         log.debug(String.format("the film with id=%s was deleted", filmId));
@@ -154,5 +154,24 @@ public class FilmService {
 
     public List<Film> search(Optional<String> query,Optional <List<String>> title) {
       return   filmStorage.search(query,title);
+
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        if (year.isPresent()) {
+            if(year.get()<0) {
+                throw new FilmNotFoundException("negative param");
+            }
+            if(year.get()>0&&year.get()<1895) {
+                throw new FilmNotFoundException("Release date may not be earlier than 28.12.1895");
+            }
+        }
+        if(genre.isPresent()){
+            if(genre.get()<0){
+                throw new FilmNotFoundException("negative param");
+            }
+            if(genre.get()==0||genre.get()>6){
+                throw new FilmNotFoundException("there is no such genre");
+            }
+        }
+        return filmStorage.getPopularFilmFoYearFoGenre(year, genre, count);
     }
 }
