@@ -8,11 +8,9 @@ import ru.yandex.practicum.filmorate.exceptions.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -22,15 +20,12 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
     private final EventStorage eventStorage;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.userStorage = userStorage;
-        this.filmStorage = filmStorage;
         this.eventStorage = eventStorage;
     }
 
@@ -121,10 +116,10 @@ public class UserService {
             throw new FriendNotFoundException(String.format("the user with id=%s does not have a friend with user id=%s",
                     userId, friendId));
     }
-
-    public List<Film> getRecommendations(int userId) {
-        if (!userStorage.doesUserExist(userId))
-            throw new UserNotFoundException(String.format("User with id=%s not found", userId));
-        return filmStorage.getRecommendations(userId);
+    public void deleteUserByIdService(int userId){
+        validate(userId);
+        userStorage.deleteUserByIdStorage(userId);
+        log.debug(String.format("the user with id=%s was deleted", userId));
     }
+
 }

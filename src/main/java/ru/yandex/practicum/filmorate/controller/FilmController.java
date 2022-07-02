@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
@@ -28,8 +30,9 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
-        return filmService.update(film);
+    public Film update(@Valid @RequestBody Film film) {
+        filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
+        return film;
     }
 
     @GetMapping(value = "/{id}")
@@ -48,11 +51,44 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        return filmService.getMostPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(value="count", required = false) Optional<Integer> count,
+                                      @RequestParam(value="genreId",required = false) Optional<Integer> genreId,
+                                      @RequestParam(value="year",required = false) Optional<Integer> year) {
+
+        if (genreId.isEmpty()&& year.isEmpty()&& count.isEmpty()) {
+            return filmService.getMostPopularFilms(10);
+
+        }
+        if(genreId.isEmpty()&& year.isEmpty()&& count.isPresent()){
+            return filmService.getMostPopularFilms(count.get());
+        }
+        else{
+            return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
+        }
+
     }
+
+    @DeleteMapping(value = "/{filmId}")
+    public void deleteFilmById(@PathVariable(value = "filmId") Integer filmId) {
+        filmService.deleteFilmByIdService(filmId);
+    }
+
     @GetMapping(value = "/common")
     public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping(value = "/search")
+    public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
+                             @RequestParam(value = "by", required = false) Optional<List<String>> title) {
+        if (query.isEmpty() && title.isEmpty()) {
+            return filmService.getMostPopularFilms(100);
+        }
+        return filmService.search(query, title);
+    }
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
+                                                     @RequestParam Optional<String> sortBy) {
+        return filmService.getSortedFilmsByDirectorId(directorId, sortBy);
     }
 }

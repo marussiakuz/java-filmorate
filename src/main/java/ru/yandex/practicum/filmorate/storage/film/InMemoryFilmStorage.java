@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
@@ -77,9 +78,19 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film.getLikes().contains(userId);
     }
 
+
     @Override
-    public List<Film> getRecommendations(int userId) {
-        throw new NotImplementedException();
+    public void deleteFilmByIdStorage(int filmId) {
+
     }
 
+    @Override
+    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
+        return null;
+    }
+
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
 }
+

@@ -121,4 +121,9 @@ public class UserDbStorage implements UserStorage {
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
     }
+    @Override
+    public void deleteUserByIdStorage(int userId){
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+    }
 }

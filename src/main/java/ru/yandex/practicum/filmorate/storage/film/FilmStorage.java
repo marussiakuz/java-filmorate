@@ -20,5 +20,7 @@ public interface FilmStorage {    // управление списком фил�
     public boolean doesFilmExist(int id);
     public boolean doesLikeExist(int filmId, int userId);
 
-    List<Film> getRecommendations(int userId);
+    public void deleteFilmByIdStorage(int filmId);
+    List<Film> search(Optional<String> query, Optional<List<String>> title);
+    List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year,Optional<Integer> genre,Optional<Integer> count);
 }

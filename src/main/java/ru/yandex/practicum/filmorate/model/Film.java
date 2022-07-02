@@ -29,6 +29,8 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 public class Film {
 
     private Integer id;
+
+    @JsonIgnore
     private final Set<Integer> likes = new TreeSet<>();
 
     @NotNull(message = "Title may not be null")
@@ -52,6 +54,8 @@ public class Film {
 
     private Rating mpa;
     private List<Genre> genres;
+    private List<Director> directors;
+
 
     public void addLike(Integer userId){
         likes.add(userId);

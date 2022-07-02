@@ -73,4 +73,9 @@ public class InMemoryUserStorage implements UserStorage {
     public boolean doesFriendExist(int userId, int friendId) {
         return users.get(userId).getFriends().contains(friendId);
     }
+
+    @Override
+    public void deleteUserByIdStorage(int userId) {
+
+    }
 }
