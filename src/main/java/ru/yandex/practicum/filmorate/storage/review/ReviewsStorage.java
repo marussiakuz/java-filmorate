@@ -7,17 +7,29 @@ import java.util.Optional;
 
 public interface ReviewsStorage {
 
-    public void add(Review review);
-    public void update(Review review);
-    public void delete(int id);
-    public Optional<Review> getReviewById(int id);
-    public List<Review> getAllReviews(int count);
-    public List<Review> getReviewsByFilmId(int id, int count);
-    public void putLike(int reviewId, int userId);
-    public void putDislike(int reviewId, int userId);
-    public void deleteLike(int reviewId, int userId);
-    public void deleteDislike(int reviewId, int userId);
-    public boolean doesLikeExist(int reviewId, int userId);
-    public boolean doesDislikeExist(int reviewId, int userId);
-    public boolean doesReviewExist(int id);
+    void add(Review review);
+
+    void update(Review review);
+
+    void delete(int id);
+
+    Optional<Review> getReviewById(int id);
+
+    List<Review> getAllReviews(int count);
+
+    List<Review> getReviewsByFilmId(int id, int count);
+
+    void putLike(int reviewId, int userId);
+
+    void putDislike(int reviewId, int userId);
+
+    void deleteLike(int reviewId, int userId);
+
+    void deleteDislike(int reviewId, int userId);
+
+    boolean doesLikeExist(int reviewId, int userId);
+
+    boolean doesDislikeExist(int reviewId, int userId);
+
+    boolean doesReviewExist(int id);
 }

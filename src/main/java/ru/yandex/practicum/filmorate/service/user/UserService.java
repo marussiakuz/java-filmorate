@@ -8,9 +8,11 @@ import ru.yandex.practicum.filmorate.exceptions.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -21,12 +23,15 @@ import java.util.Optional;
 public class UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
+                       @Qualifier("eventDbStorage") EventStorage eventStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
+        this.filmStorage = filmStorage;
     }
 
     public List<User> getAllUsers() {
@@ -53,6 +58,7 @@ public class UserService {
 
         return user;
     }
+
     public User getUserById(int userId) {
         validate(userId);
 
@@ -108,7 +114,8 @@ public class UserService {
     }
 
     private void checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank())
+            user.setName(user.getLogin());
     }
 
     private void validateFriendship(int userId, int friendId) {
@@ -116,10 +123,14 @@ public class UserService {
             throw new FriendNotFoundException(String.format("the user with id=%s does not have a friend with user id=%s",
                     userId, friendId));
     }
-    public void deleteUserByIdService(int userId){
+
+    public void deleteUserByIdService(int userId) {
         validate(userId);
         userStorage.deleteUserByIdStorage(userId);
         log.debug(String.format("the user with id=%s was deleted", userId));
     }
 
+    public List<Film> getRecommendations(int userId) {
+        return filmStorage.getRecommendations(userId);
+    }
 }

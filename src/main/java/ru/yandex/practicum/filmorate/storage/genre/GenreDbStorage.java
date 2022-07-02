@@ -34,12 +34,12 @@ public class GenreDbStorage implements GenreStorage {
     public boolean doesGenreExist(int id) {
         String sql = "SELECT COUNT(*) FROM genre WHERE genre_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { id }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class);
 
         return count > 0;
     }
 
-    private Genre mapRowToGenre (ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))

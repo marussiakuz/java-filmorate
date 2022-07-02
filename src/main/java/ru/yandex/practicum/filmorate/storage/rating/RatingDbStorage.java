@@ -34,12 +34,12 @@ public class RatingDbStorage implements RatingStorage {
     public boolean doesRatingExist(int id) {
         String sql = "SELECT COUNT(*) FROM rating WHERE rating_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { id }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class);
 
         return count > 0;
     }
 
-    private Rating mapRowToRating (ResultSet resultSet, int rowNum) throws SQLException {
+    private Rating mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {
         return Rating.builder()
                 .id(resultSet.getInt("rating_id"))
                 .name(resultSet.getString("name_rating"))

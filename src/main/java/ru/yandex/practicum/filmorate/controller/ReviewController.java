@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
-
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.review.ReviewService;
 
@@ -41,7 +40,8 @@ public class ReviewController {
     @GetMapping
     public List<Review> getReviewsByFilmId(@RequestParam(required = false) Integer filmId,
                                            @RequestParam(defaultValue = "10", required = false) Integer count) {
-        if (filmId == null) return reviewService.getAllReviews(count);
+        if (filmId == null)
+            return reviewService.getAllReviews(count);
         return reviewService.getReviewsByFilmId(filmId, count);
     }
 

@@ -20,14 +20,17 @@ public class DirectorController {
     public Director add(@Valid @RequestBody Director director) {
         return directorService.add(director);
     }
+
     @PutMapping
     public Director update(@Valid @RequestBody Director director) {
         return directorService.update(director);
     }
+
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable(value = "id") Integer directorId) {
         directorService.delete(directorId);
     }
+
     @GetMapping
     public List<Director> getAllDirector() {
         return directorService.getAllDirector();

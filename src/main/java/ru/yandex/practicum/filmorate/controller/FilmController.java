@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-
-import java.util.List;
-import java.util.Optional;
-
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -51,18 +49,17 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(value="count", required = false) Optional<Integer> count,
-                                      @RequestParam(value="genreId",required = false) Optional<Integer> genreId,
-                                      @RequestParam(value="year",required = false) Optional<Integer> year) {
+    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false) Optional<Integer> count,
+                                      @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
+                                      @RequestParam(value = "year", required = false) Optional<Integer> year) {
 
-        if (genreId.isEmpty()&& year.isEmpty()&& count.isEmpty()) {
+        if (genreId.isEmpty() && year.isEmpty() && count.isEmpty()) {
             return filmService.getMostPopularFilms(10);
 
         }
-        if(genreId.isEmpty()&& year.isEmpty()&& count.isPresent()){
+        if (genreId.isEmpty() && year.isEmpty() && count.isPresent()) {
             return filmService.getMostPopularFilms(count.get());
-        }
-        else{
+        } else {
             return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
         }
 
@@ -86,6 +83,7 @@ public class FilmController extends AbstractController<Film> {
         }
         return filmService.search(query, title);
     }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
                                                      @RequestParam Optional<String> sortBy) {

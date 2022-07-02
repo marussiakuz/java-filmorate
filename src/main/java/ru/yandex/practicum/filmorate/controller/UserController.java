@@ -2,17 +2,17 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
-
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends AbstractController<User>{
+public class UserController extends AbstractController<User> {
     private final UserService userService;
 
     @Autowired
@@ -68,5 +68,10 @@ public class UserController extends AbstractController<User>{
     @GetMapping(value = "/{id}/feed")
     public List<Event> getEvents(@PathVariable(value = "id") Integer userId) {
         return userService.getEvents(userId);
+    }
+
+    @GetMapping(value = "/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable(value = "id") Integer userId) {
+        return userService.getRecommendations(userId);
     }
 }

@@ -18,7 +18,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void add(User user) {
         if (user.getId() == null || user.getId() == 0) {
-            if (users.isEmpty()) user.setId(1);
+            if (users.isEmpty())
+                user.setId(1);
             else {
                 int maxId = users.keySet().stream().max(Comparator.naturalOrder()).get();
                 user.setId(++maxId);

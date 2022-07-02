@@ -54,8 +54,9 @@ public class DirectorDbStorage implements DirectorStorage {
         if (thereIsDirector(directorId)) {
             String sql = "DELETE FROM DIRECTOR WHERE director_id = ?";
             jdbcTemplate.update(sql, directorId);
-        } else throw new DirectorNotFoundException(String.format("Attempt to remove the director using " +
-                "missing id = %d", directorId));
+        } else
+            throw new DirectorNotFoundException(String.format("Attempt to remove the director using " +
+                    "missing id = %d", directorId));
     }
 
 
@@ -68,8 +69,9 @@ public class DirectorDbStorage implements DirectorStorage {
             jdbcTemplate.update(sqlQuery,
                     director.getName(),
                     director.getId());
-        } else throw new DirectorNotFoundException(String.format("Attempt to update the director using " +
-                "missing id = %d", director.getId()));
+        } else
+            throw new DirectorNotFoundException(String.format("Attempt to update the director using " +
+                    "missing id = %d", director.getId()));
     }
 
     @Override
@@ -84,8 +86,9 @@ public class DirectorDbStorage implements DirectorStorage {
         if (thereIsDirector(id)) {
             String sqlQuery = "SELECT * FROM director WHERE director_id = ?";
             return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
-        } else throw new DirectorNotFoundException(String.format("Trying to get a director using " +
-                "missing id = %d", id));
+        } else
+            throw new DirectorNotFoundException(String.format("Trying to get a director using " +
+                    "missing id = %d", id));
     }
 
     @Override
