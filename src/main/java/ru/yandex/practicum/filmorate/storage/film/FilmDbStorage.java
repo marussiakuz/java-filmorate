@@ -128,6 +128,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> popularFilms = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
 
         popularFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+        popularFilms.forEach(film->film.setDirectors(getDirectorsByFilmId(film.getId())));
 
         return popularFilms;
     }
