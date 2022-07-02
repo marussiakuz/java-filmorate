@@ -30,8 +30,9 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
-        return filmService.update(film);
+    public Film update(@Valid @RequestBody Film film) {
+        filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
+        return film;
     }
 
     @GetMapping(value = "/{id}")
@@ -77,4 +78,17 @@ public class FilmController extends AbstractController<Film> {
         return filmService.getCommonFilms(userId, friendId);
     }
 
+    @GetMapping(value = "/search")
+    public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
+                             @RequestParam(value = "by", required = false) Optional<List<String>> title) {
+        if (query.isEmpty() && title.isEmpty()) {
+            return filmService.getMostPopularFilms(100);
+        }
+        return filmService.search(query, title);
+    }
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
+                                                     @RequestParam Optional<String> sortBy) {
+        return filmService.getSortedFilmsByDirectorId(directorId, sortBy);
+    }
 }

@@ -3,18 +3,22 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.*;
 
 import ru.yandex.practicum.filmorate.exceptions.FilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.LikeNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import javax.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +30,16 @@ public class FilmService {
     private final RatingStorage ratingStorage;
     private final EventStorage eventStorage;
 
+    private final DirectorStorage directorStorage;
+
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                        @Qualifier("directorDbStorage") DirectorStorage directorStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("ratingDbStorage") RatingStorage ratingStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.directorStorage = directorStorage;
         this.ratingStorage = ratingStorage;
         this.eventStorage = eventStorage;
     }
@@ -97,6 +105,28 @@ public class FilmService {
         return filmStorage.getMostPopularFilms(count);
     }
 
+    public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
+        if (param.isEmpty()) throw new ValidationException("Attempt to get sorted films with " +
+                "empty parameter");
+        if (!directorStorage.isDirectorExists(directorId)) throw new DirectorNotFoundException(
+                String.format("Attempt to get sorted films with absent director id = %s", directorId));
+
+        String sortParameter = param.get();
+        switch (sortParameter) {
+            case "year": {
+                List<Film> films = directorStorage.getMostFilmsYear(directorId);
+                return films;
+            }
+            case "likes": {
+                List<Film> films = directorStorage.getMostFilmsLiks(directorId);
+                return films;
+            }
+            default:
+                throw new DirectorNotFoundException(String.format("Attempt to get sorted films with " +
+                        "unknown parameter = %s", sortParameter));
+        }
+    }
+
     private void validateFilm(int filmId) {
         if (!filmStorage.doesFilmExist(filmId))
             throw new FilmNotFoundException(String.format("Film with id=%s not found", filmId));
@@ -122,6 +152,9 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
+    public List<Film> search(Optional<String> query,Optional <List<String>> title) {
+        return filmStorage.search(query, title);
+    }
     public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
         if (year.isPresent()) {
             if(year.get()<0) {

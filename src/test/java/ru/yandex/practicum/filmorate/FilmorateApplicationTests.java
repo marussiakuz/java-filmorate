@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FilmorateApplicationTests {
 	private final UserDbStorage userDbStorage;
 	private final FilmDbStorage filmDbStorage;
+
 	private final EventDbStorage eventDbStorage;
 	private final JdbcTemplate jdbcTemplate;
 
@@ -47,7 +48,6 @@ class FilmorateApplicationTests {
 				.email("email@gmail.com")
 				.birthday(LocalDate.of(1980, 12, 12))
 				.build();
-
 		userDbStorage.add(user);
 
 		assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));

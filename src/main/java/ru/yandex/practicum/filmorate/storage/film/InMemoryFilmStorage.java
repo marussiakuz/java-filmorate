@@ -78,13 +78,19 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film.getLikes().contains(userId);
     }
 
+
     @Override
     public void deleteFilmByIdStorage(int filmId) {
 
     }
 
     @Override
+    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
+        return null;
+    }
+
     public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
 }
+
