@@ -153,8 +153,8 @@ public class FilmService {
     }
 
     public List<Film> search(Optional<String> query,Optional <List<String>> title) {
-      return   filmStorage.search(query,title);
-
+        return filmStorage.search(query, title);
+    }
     public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
         if (year.isPresent()) {
             if(year.get()<0) {
