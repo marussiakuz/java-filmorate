@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -7,31 +8,19 @@ import java.util.Optional;
 
 public interface FilmStorage {    // управление списком фильмов
 
-    List<Film> getAllFilms();
-
-    void add(Film film);
-
-    void update(Film film);
-
-    Optional<Film> getFilmById(int id);
-
-    void addLike(int filmId, int userId);
-
-    void deleteLike(int filmId, int userId);
-
-    List<Film> getMostPopularFilms(int count);
-
-    List<Film> getCommonFilms(int user_id, int friend_id);
-
-    boolean doesFilmExist(int id);
-
-    boolean doesLikeExist(int filmId, int userId);
-
-    void deleteFilmByIdStorage(int filmId);
-
-    List<Film> search(Optional<String> query, Optional<List<String>> title);
-
-    List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count);
-
-    List<Film> getRecommendations(int userId);
+    public List<Film> getAllFilms();
+    public void add(Film film);
+    public void update(Film film);
+    public Optional<Film> getFilmById(int id);
+    public void addLike(int filmId, int userId);
+    public void deleteLike(int filmId, int userId);
+    public List<Film> getMostPopularFilms(int count);
+    public List<Film> getCommonFilms(int user_id, int friend_id);
+    public boolean doesFilmExist(int id);
+    public boolean doesLikeExist(int filmId, int userId);
+    public void deleteFilmByIdStorage(int filmId);
+    public List<Film> search(Optional<String> query, Optional<List<String>> title);
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count);
+    public List<Director> getDirectorsByFilmId(int filmId);
+    public List<Film> getRecommendations(int userId);
 }

@@ -49,9 +49,7 @@ CREATE TABLE IF NOT EXISTS film
     release_date DATE,
     duration     INT,
     rating_id    INT,
-    director_id  INT,
-    FOREIGN KEY (rating_id) REFERENCES rating (rating_id) ON DELETE CASCADE,
-    FOREIGN KEY (director_id) REFERENCES director (director_id) ON DELETE CASCADE
+    FOREIGN KEY (rating_id) REFERENCES rating (rating_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS likes

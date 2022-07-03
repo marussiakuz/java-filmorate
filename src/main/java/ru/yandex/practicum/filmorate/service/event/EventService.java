@@ -8,12 +8,9 @@ import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 @Slf4j
 @Service
 public class EventService {
-
     private final EventStorage eventStorage;
 
     public EventService(@Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.eventStorage = eventStorage;
     }
-
-
 }

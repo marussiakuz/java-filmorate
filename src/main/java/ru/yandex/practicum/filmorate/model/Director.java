@@ -13,10 +13,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Builder
 public class Director {
-
     private Integer id;
+
     @NotNull(message = "Title may not be null")
     @NotBlank(message = "Title may not be blank")
     private String name;
-
 }

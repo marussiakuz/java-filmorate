@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.service.review;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -17,7 +19,6 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ReviewService {
-
     private final ReviewsStorage reviewsStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
@@ -44,7 +45,7 @@ public class ReviewService {
         log.debug(String.format("new review with id=%s added successfully", review.getId()));
 
         eventStorage.addAddEvent(review.getUserId(), review.getId(), EventType.REVIEW);
-        log.debug(String.format("the add review event was completed successfully"));
+        log.debug("the add review event was completed successfully");
 
         return review;
     }
@@ -95,7 +96,6 @@ public class ReviewService {
 
     public List<Review> getReviewsByFilmId(int filmId, int count) {
         validateFilm(filmId);
-
         return reviewsStorage.getReviewsByFilmId(filmId, count);
     }
 
@@ -149,7 +149,7 @@ public class ReviewService {
 
     private void validateFilm(int filmId) {
         if (filmId == 0)
-            throw new FilmIsNullException(String.format("Film not specified", filmId));
+            throw new FilmIsNullException("Film is not specified");
         if (!filmStorage.doesFilmExist(filmId))
             throw new FilmNotFoundException(String.format("Film with id=%s not found", filmId));
     }

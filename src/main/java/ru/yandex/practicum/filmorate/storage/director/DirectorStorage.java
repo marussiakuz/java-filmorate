@@ -7,24 +7,13 @@ import java.util.List;
 
 public interface DirectorStorage {
 
-    void add(Director director);
-
-    List<Director> getAllDirector();
-
-    Director getDirectorById(int id);
-
-    void delete(int id);
-
-    void update(Director director);
-
-    boolean doesDirectorExist(int id);
-
-
-    boolean isDirectorExists(Integer id);
-
-    List<Film> getMostFilmsYear(int count);
-
-    List<Film> getMostFilmsLiks(int count);
-
-
+    public void add(Director director);
+    public List<Director> getAllDirector();
+    public Director getDirectorById(int id);
+    public void delete(int id);
+    public void update(Director director);
+    public boolean doesDirectorExist(int id);
+    public boolean isDirectorExists(Integer id);
+    public List<Film> getMostFilmsYear(int directorId);
+    public List<Film> getMostFilmsLikes(int directorId);
 }

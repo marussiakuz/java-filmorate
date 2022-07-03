@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Builder
 public class Review {
-
     private int id;
 
     @NotNull(message = "Content may not be null")
@@ -20,6 +19,7 @@ public class Review {
 
     @NotNull
     private Boolean isPositive;
+
     private int userId;
     private int filmId;
     private int useful;

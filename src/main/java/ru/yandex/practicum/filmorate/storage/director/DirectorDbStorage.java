@@ -5,14 +5,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.DirectorNotFoundException;
+
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.rating.RatingDbStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,54 +21,37 @@ import java.util.Objects;
 @Component("directorDbStorage")
 public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final RatingDbStorage ratingDbStorage;
-    private final GenreDbStorage genreDbStorage;
 
-    private final FilmDbStorage filmDbStorage;
-
-
-    public DirectorDbStorage(JdbcTemplate jdbcTemplate, RatingDbStorage ratingDbStorage, GenreDbStorage genreDbStorage, FilmDbStorage filmDbStorage) {
+    public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.ratingDbStorage = ratingDbStorage;
-        this.genreDbStorage = genreDbStorage;
-        this.filmDbStorage = filmDbStorage;
     }
 
     @Override
     public void add(Director director) {
         String sqlQuery = "INSERT INTO director(name_director) VALUES (?)";
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"director_id"});
             stmt.setString(1, director.getName());
             return stmt;
         }, keyHolder);
+
         director.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
     }
 
     @Override
     public void delete(int directorId) {
-        if (thereIsDirector(directorId)) {
-            String sql = "DELETE FROM DIRECTOR WHERE director_id = ?";
-            jdbcTemplate.update(sql, directorId);
-        } else
-            throw new DirectorNotFoundException(String.format("Attempt to remove the director using " +
-                    "missing id = %d", directorId));
-    }
+        String sql = "DELETE FROM DIRECTOR WHERE director_id = ?";
 
+        jdbcTemplate.update(sql, directorId);
+    }
 
     @Override
     public void update(Director director) {
-        if (thereIsDirector(director.getId())) {
-            String sqlQuery = "UPDATE director SET name_director = ?" +
-                    "WHERE director_id = ?";
+        String sqlQuery = "UPDATE director SET name_director = ? WHERE director_id = ?";
 
-            jdbcTemplate.update(sqlQuery,
-                    director.getName(),
-                    director.getId());
-        } else
-            throw new DirectorNotFoundException(String.format("Attempt to update the director using " +
-                    "missing id = %d", director.getId()));
+        jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
     }
 
     @Override
@@ -83,12 +63,9 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director getDirectorById(int id) {
-        if (thereIsDirector(id)) {
-            String sqlQuery = "SELECT * FROM director WHERE director_id = ?";
-            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
-        } else
-            throw new DirectorNotFoundException(String.format("Trying to get a director using " +
-                    "missing id = %d", id));
+        String sqlQuery = "SELECT * FROM director WHERE director_id = ?";
+
+        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
     }
 
     @Override
@@ -100,30 +77,26 @@ public class DirectorDbStorage implements DirectorStorage {
         return count > 0;
     }
 
-    public List<Film> getMostFilmsYear(int count) {
+    public List<Film> getMostFilmsYear(int directorId) {
+        String sq = "SELECT * FROM FILM AS f LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN RATING R ON f.RATING_ID = R.RATING_ID WHERE fd.director_id = ? ORDER BY f.release_Date";
 
-        String sq = String.format("SELECT * FROM FILM AS f LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id left join RATING R on f.RATING_ID = R.RATING_ID WHERE fd.director_id = %s\n" +
-                "              ORDER BY f.release_Date", count);
-        List<Film> yearFilms = jdbcTemplate.query(sq, this::mapRowToFilm);
+        List<Film> yearFilms = jdbcTemplate.query(sq, this::mapRowToFilm, directorId);
         yearFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
         yearFilms.stream().map(Film::getGenres).filter(genres -> genres.size() == 0).forEach(genres -> genres = null);
-        yearFilms.forEach(film -> film.setDirectors(filmDbStorage.getDirectorsByFilmId(film.getId())));
-        for (Film film : yearFilms) {
-            if (film.getGenres().size() == 0) {
-                film.setGenres(null);
-            }
-        }
+
         return yearFilms;
     }
 
+    public List<Film> getMostFilmsLikes(int directorId) {
+        String sq = "SELECT * FROM FILM RIGHT JOIN (SELECT * FROM film_director) USING (film_id) INNER JOIN " +
+                "(SELECT film_id, COUNT(*) AS count_of_likes FROM likes GROUP BY film_id) USING (film_id) " +
+                "WHERE director_id = ? ORDER BY count_of_likes DESC";
 
-    public List<Film> getMostFilmsLiks(int count) {
-        String sq = String.format("SELECT * FROM FILM AS f LEFT JOIN LIKES AS l ON f.film_id = l.film_id LEFT JOIN FILM_DIRECTOR AS fd ON f.film_id = fd.film_id left join RATING R on f.RATING_ID = R.RATING_ID\n" +
-                "WHERE fd.director_id = %s GROUP BY f.FILM_ID ORDER BY COUNT(l.FILM_ID) DESC;", count);
-        List<Film> liksFilms = jdbcTemplate.query(sq, this::mapRowToFilm);
-        liksFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
-        liksFilms.forEach(film -> film.setDirectors(filmDbStorage.getDirectorsByFilmId(film.getId())));
-        return liksFilms;
+        List<Film> likesFilms = jdbcTemplate.query(sq, this::mapRowToFilm, directorId);
+        likesFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
+
+        return likesFilms;
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {
@@ -131,12 +104,6 @@ public class DirectorDbStorage implements DirectorStorage {
                 "USING(genre_id)";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
-    }
-
-    public boolean thereIsDirector(int id) {
-        String sql = "SELECT * FROM DIRECTOR WHERE director_id = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
-        return userRows.next();
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -170,6 +137,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
     public boolean isDirectorExists(Integer id) {
         String sql = "SELECT name_director FROM director WHERE director_id = ?";
+
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.next();
     }

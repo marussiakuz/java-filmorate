@@ -10,7 +10,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
-
     private final ReviewService reviewService;
 
     public ReviewController(ReviewService reviewService) {
@@ -40,8 +39,7 @@ public class ReviewController {
     @GetMapping
     public List<Review> getReviewsByFilmId(@RequestParam(required = false) Integer filmId,
                                            @RequestParam(defaultValue = "10", required = false) Integer count) {
-        if (filmId == null)
-            return reviewService.getAllReviews(count);
+        if (filmId == null) return reviewService.getAllReviews(count);
         return reviewService.getReviewsByFilmId(filmId, count);
     }
 

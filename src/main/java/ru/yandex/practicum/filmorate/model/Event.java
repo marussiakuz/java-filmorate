@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 @Setter
 @Builder
 public class Event {
-
     private int id;
     private int userId;
     private int entityId;

@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.ValidationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,6 @@ public class FilmService {
     private final UserStorage userStorage;
     private final RatingStorage ratingStorage;
     private final EventStorage eventStorage;
-
     private final DirectorStorage directorStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
@@ -82,7 +82,7 @@ public class FilmService {
         log.debug(String.format("the film with id=%s liked the user with id=%s", filmId, userId));
 
         eventStorage.addAddEvent(userId, filmId, EventType.LIKE);
-        log.debug(String.format("the add like event was completed successfully"));
+        log.debug("the add like event was completed successfully");
     }
 
     public void deleteLike(int filmId, int userId) {
@@ -92,7 +92,7 @@ public class FilmService {
         log.debug(String.format("the film with id=%s disliked the user with id=%s", filmId, userId));
 
         eventStorage.addRemoveEvent(userId, filmId, EventType.LIKE);
-        log.debug(String.format("the delete like event was completed successfully"));
+        log.debug("the delete like event was completed successfully");
     }
 
     public List<Film> getMostPopularFilms(int count) {
@@ -101,26 +101,35 @@ public class FilmService {
 
     public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
         if (param.isEmpty())
-            throw new ValidationException("Attempt to get sorted films with " +
-                    "empty parameter");
+            throw new ValidationException("Attempt to get sorted films with empty parameter");
         if (!directorStorage.isDirectorExists(directorId))
-            throw new DirectorNotFoundException(
-                    String.format("Attempt to get sorted films with absent director id = %s", directorId));
+            throw new DirectorNotFoundException(String.format("Attempt to get sorted films with absent director id = %s",
+                    directorId));
 
+        List<Film> sortedFilms = new ArrayList<>();
         String sortParameter = param.get();
         switch (sortParameter) {
             case "year": {
-                List<Film> films = directorStorage.getMostFilmsYear(directorId);
-                return films;
+                sortedFilms = directorStorage.getMostFilmsYear(directorId);
+                sortedFilms.forEach(film -> film.setDirectors(filmStorage.getDirectorsByFilmId(film.getId())));
+                for (Film film : sortedFilms) {
+                    if (film.getGenres().size() == 0) {
+                        film.setGenres(null);
+                    }
+                }
+                break;
             }
             case "likes": {
-                List<Film> films = directorStorage.getMostFilmsLiks(directorId);
-                return films;
+                System.out.println("здесь");
+                sortedFilms = directorStorage.getMostFilmsLikes(directorId);
+                sortedFilms.forEach(film -> film.setDirectors(filmStorage.getDirectorsByFilmId(film.getId())));
+                break;
             }
             default:
                 throw new DirectorNotFoundException(String.format("Attempt to get sorted films with " +
                         "unknown parameter = %s", sortParameter));
         }
+        return sortedFilms;
     }
 
     private void validateFilm(int filmId) {
@@ -152,22 +161,14 @@ public class FilmService {
         return filmStorage.search(query, title);
     }
 
-    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
-        if (year.isPresent()) {
-            if (year.get() < 0) {
-                throw new FilmNotFoundException("negative param");
-            }
-            if (year.get() > 0 && year.get() < 1895) {
-                throw new FilmNotFoundException("Release date may not be earlier than 28.12.1895");
-            }
+    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre,
+                                                  Optional<Integer> count) {
+        if (year.isPresent() && year.get() < 1895) {
+            throw new FilmNotFoundException(year.get() < 0 ? "negative param" : "Release date may not be " +
+                    "earlier than 28.12.1895");
         }
-        if (genre.isPresent()) {
-            if (genre.get() < 0) {
-                throw new FilmNotFoundException("negative param");
-            }
-            if (genre.get() == 0 || genre.get() > 6) {
-                throw new FilmNotFoundException("there is no such genre");
-            }
+        if (genre.isPresent() && (genre.get() <= 0 || genre.get() > 6)) {
+            throw new FilmNotFoundException(genre.get() < 0 ? "negative param" : "there is no such genre");
         }
         return filmStorage.getPopularFilmFoYearFoGenre(year, genre, count);
     }

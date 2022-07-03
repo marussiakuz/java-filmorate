@@ -53,16 +53,11 @@ public class FilmController extends AbstractController<Film> {
                                       @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
                                       @RequestParam(value = "year", required = false) Optional<Integer> year) {
 
-        if (genreId.isEmpty() && year.isEmpty() && count.isEmpty()) {
-            return filmService.getMostPopularFilms(10);
-
+        if (genreId.isEmpty() && year.isEmpty()) {
+            return count.isPresent() ? filmService.getMostPopularFilms(count.get())
+                    : filmService.getMostPopularFilms(10);
         }
-        if (genreId.isEmpty() && year.isEmpty() && count.isPresent()) {
-            return filmService.getMostPopularFilms(count.get());
-        } else {
-            return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
-        }
-
+        return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
     }
 
     @DeleteMapping(value = "/{filmId}")

@@ -26,8 +26,10 @@ public class User {
 
     @JsonIgnore
     private final Map<Integer, Boolean> friends = new HashMap<>();
+
     private Integer id;
     private String name;
+
     @NotNull(message = "Email may not be null")
     @NotBlank(message = "Email may not be blank")
     @Email(message = "The email is incorrect")
@@ -54,6 +56,4 @@ public class User {
     public Set<Integer> getFriends() {
         return friends.keySet();
     }
-
-
 }

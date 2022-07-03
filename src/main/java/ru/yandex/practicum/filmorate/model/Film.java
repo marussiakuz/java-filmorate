@@ -32,6 +32,7 @@ public class Film {
     @JsonIgnore
     private final Set<Integer> likes = new TreeSet<>();
     private Integer id;
+
     @NotNull(message = "Title may not be null")
     @NotBlank(message = "Title may not be blank")
     private String name;
@@ -54,7 +55,6 @@ public class Film {
     private Rating mpa;
     private List<Genre> genres;
     private List<Director> directors;
-
 
     public void addLike(Integer userId) {
         likes.add(userId);

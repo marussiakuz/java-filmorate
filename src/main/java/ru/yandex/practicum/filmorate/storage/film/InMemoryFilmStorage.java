@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -78,18 +79,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film.getLikes().contains(userId);
     }
 
-
     @Override
     public void deleteFilmByIdStorage(int filmId) {
-
+        throw new UnsupportedOperationException("UnsupportedOperation");
     }
 
     @Override
     public List<Film> search(Optional<String> query, Optional<List<String>> title) {
-        return null;
+        throw new UnsupportedOperationException("UnsupportedOperation");
     }
 
     public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
+
+    @Override
+    public List<Director> getDirectorsByFilmId(int filmId) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
 

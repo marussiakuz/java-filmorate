@@ -26,8 +26,8 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class, LikeNotFoundException.class,
-            GenreNotFoundException.class, RatingNotFoundException.class, DirectorNotFoundException.class, DirectorNotFoundException.class})
-
+            GenreNotFoundException.class, RatingNotFoundException.class, ReviewNotFoundException.class,
+            DirectorNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         if (e instanceof FilmNotFoundException)
@@ -57,9 +57,9 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final NullPointerException e) {
         if (e instanceof FilmIsNullException)
-            return new ErrorResponse("Film not specified");
+            return new ErrorResponse("Film is not specified");
         else if (e instanceof UserIsNullException)
-            return new ErrorResponse("User not specified");
-        return new ErrorResponse("Entity not specified");
+            return new ErrorResponse("User is not specified");
+        return new ErrorResponse("Entity is not specified");
     }
 }
