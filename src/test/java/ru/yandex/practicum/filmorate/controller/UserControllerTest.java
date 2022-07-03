@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -39,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql({"/schema.sql", "/test-data.sql"})
 @AutoConfigureMockMvc
 class UserControllerTest {
-
     private static User user;
 
     @Autowired
@@ -48,10 +46,6 @@ class UserControllerTest {
     @Qualifier("userDbStorage")
     @Autowired
     private UserStorage userStorage;
-
-    @Qualifier("eventDbStorage")
-    @Autowired
-    private EventStorage eventStorage;
 
     @Autowired
     private ObjectMapper mapper;
