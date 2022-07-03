@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -8,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
+
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
@@ -33,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FilmorateApplicationTests {
     private final UserDbStorage userDbStorage;
     private final FilmDbStorage filmDbStorage;
-
     private final EventDbStorage eventDbStorage;
     private final JdbcTemplate jdbcTemplate;
 
@@ -302,6 +303,4 @@ class FilmorateApplicationTests {
         assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 
     }
-
-
 }
