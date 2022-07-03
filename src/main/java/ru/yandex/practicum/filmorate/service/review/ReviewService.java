@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.ReviewAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exceptions.entityIsNullExceptions.FilmIsNullException;
+import ru.yandex.practicum.filmorate.exceptions.entityIsNullExceptions.UserIsNullException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;

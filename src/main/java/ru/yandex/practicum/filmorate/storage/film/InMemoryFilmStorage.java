@@ -85,11 +85,22 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> search(Optional<String> query, Optional<List<String>> title) {
+    public List<Film> search(String query, List<String> title) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
 
-    public List<Film> getPopularFilmFoYearFoGenre(Optional<Integer> year, Optional<Integer> genre, Optional<Integer> count) {
+    @Override
+    public List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
+
+    @Override
+    public List<Film> getPopularFilmFoYear(int year, int count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
+
+    @Override
+    public List<Film> getPopularFilmFoGenre(int genreId, int count) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
 

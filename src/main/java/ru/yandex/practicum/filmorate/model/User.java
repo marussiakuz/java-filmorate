@@ -23,7 +23,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class User {
-
     @JsonIgnore
     private final Map<Integer, Boolean> friends = new HashMap<>();
 

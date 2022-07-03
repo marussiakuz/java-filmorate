@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exceptions;
+package ru.yandex.practicum.filmorate.exceptions.entityIsNullExceptions;
 
 public class UserIsNullException extends NullPointerException {
 

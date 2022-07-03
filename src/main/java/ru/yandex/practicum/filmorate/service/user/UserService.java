@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exceptions.FriendNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.FriendNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.UserAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -42,7 +42,7 @@ public class UserService {
 
     public User add(User user) {
         if (user.getId() != null && userStorage.doesUserExist(user.getId()))
-            throw new UserAlreadyExistException(String.format("User with id=%s already exists", user.getId()));
+            throw new UserAlreadyExistsException(String.format("User with id=%s already exists", user.getId()));
         checkName(user);
 
         userStorage.add(user);

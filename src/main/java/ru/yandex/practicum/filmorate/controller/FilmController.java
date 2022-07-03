@@ -49,15 +49,15 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false) Optional<Integer> count,
+    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                       @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
                                       @RequestParam(value = "year", required = false) Optional<Integer> year) {
-
-        if (genreId.isEmpty() && year.isEmpty()) {
-            return count.isPresent() ? filmService.getMostPopularFilms(count.get())
-                    : filmService.getMostPopularFilms(10);
-        }
-        return filmService.getPopularFilmFoYearFoGenre(year, genreId, count);
+        if (genreId.isPresent() || year.isPresent())
+            return genreId.isPresent() && year.isPresent() ?
+                    filmService.getPopularFilmFoYearFoGenre(year.get(), genreId.get(), count) : genreId.isPresent() ?
+                    filmService.getPopularFilmFoGenre(genreId.get(), count) :
+                    filmService.getPopularFilmFoYear(year.get(), count);
+        return filmService.getMostPopularFilms(count);
     }
 
     @DeleteMapping(value = "/{filmId}")
@@ -73,10 +73,8 @@ public class FilmController extends AbstractController<Film> {
     @GetMapping(value = "/search")
     public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
                              @RequestParam(value = "by", required = false) Optional<List<String>> title) {
-        if (query.isEmpty() && title.isEmpty()) {
-            return filmService.getMostPopularFilms(100);
-        }
-        return filmService.search(query, title);
+        if (query.isPresent() && title.isPresent()) return filmService.search(query.get(), title.get());
+        return filmService.getMostPopularFilms(100);
     }
 
     @GetMapping("/director/{directorId}")

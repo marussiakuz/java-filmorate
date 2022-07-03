@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.service.director;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.DirectorAlreadyExsists;
-import ru.yandex.practicum.filmorate.exceptions.DirectorNotFoundException;
+
+import ru.yandex.practicum.filmorate.exceptions.InvalidDataException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
@@ -20,10 +21,8 @@ public class DirectorService {
     }
 
     public Director add(Director director) {
-        if (directorStorage.doesDirectorExist(director.getId()))
-            throw new DirectorAlreadyExsists(String.format("Director with id=%s already exists", director.getId()));
         if (director.getName().isEmpty())
-            throw new DirectorNotFoundException("You can't add a director with an empty name");
+            throw new InvalidDataException("You can't add a director with an empty name");
 
         directorStorage.add(director);
         log.debug(String.format("new director with id=%s added successfully", director.getId()));
@@ -32,6 +31,7 @@ public class DirectorService {
     }
 
     public void delete(Integer directorId) {
+        validate(directorId);
         directorStorage.delete(directorId);
         log.debug(String.format("The director with id=%s has been deleted", directorId));
     }
@@ -46,7 +46,7 @@ public class DirectorService {
     }
 
     public List<Director> getAllDirector() {
-        return directorStorage.getAllDirector();
+        return directorStorage.getAllDirectors();
     }
 
     public Director getDirectorById(int id) {
@@ -57,6 +57,6 @@ public class DirectorService {
     private void validate(int directorId) {
         if (!directorStorage.doesDirectorExist(directorId))
             throw new DirectorNotFoundException(String.format("Director with id=%s not found", directorId));
-        log.debug(String.format("Attempt to remove the director using missing id = %s", directorId));
+        log.debug(String.format("Attempt to add/remove/update the director using missing id = %s", directorId));
     }
 }

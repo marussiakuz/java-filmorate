@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Component("reviewsDbStorage")
 public class ReviewsDbStorage implements ReviewsStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
     public ReviewsDbStorage(JdbcTemplate jdbcTemplate) {
