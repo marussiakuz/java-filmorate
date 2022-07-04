@@ -14,9 +14,10 @@ Template repository for Filmorate project.
 
 (Реализовано всё кроме *** Рефакторинг: лайки → оценки)
 
-В коде к некоторым новым методам добавлены небольшие комментарии с описанием
+В коде к некоторым новым методам добавлены небольшие комментарии с описанием.
+Обновлена схема базы данных.
 
 <h1>** Database diagrams ** </h1>>
 
 
-![схемы базы данных](https://github.com/marussiakuz/java-filmorate/blob/main/DATABASE%20schemas.png?raw=true)
+![схемы базы данных](https://github.com/marussiakuz/java-filmorate/blob/develop/DATABASE%20schemas.png?raw=true)
