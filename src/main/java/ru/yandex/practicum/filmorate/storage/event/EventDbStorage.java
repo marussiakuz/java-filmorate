@@ -21,7 +21,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public void addAddEvent(int userId, int entityId, EventType eventType) {
+    public void addAddEvent(int userId, int entityId, EventType eventType) {  // добавить событие ADD
         String sqlQuery = "INSERT INTO events(user_id, entity_id, event_type, operation, time_stamp) " +
                 "SELECT ?, ?, ?, ?, ?";
 
@@ -37,7 +37,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public void addRemoveEvent(int userId, int entityId, EventType eventType) {
+    public void addRemoveEvent(int userId, int entityId, EventType eventType) {  //  добавить событие REMOVE
         String sqlQuery = "INSERT INTO events(user_id, entity_id, event_type, operation, time_stamp) " +
                 "SELECT ?, ?, ?, ?, ?";
 
@@ -53,7 +53,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public void addUpdateEvent(int userId, int entityId, EventType eventType) {
+    public void addUpdateEvent(int userId, int entityId, EventType eventType) {  //  добавить событие UPDATE
         String sqlQuery = "INSERT INTO events(user_id, entity_id, event_type, operation, time_stamp) " +
                 "SELECT ?, ?, ?, ?, ?";
 
@@ -69,7 +69,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public List<Event> getEvents(int userId) {
+    public List<Event> getEvents(int userId) {  // возвращает список событий определенного пользователя
         String sqlQuery = "SELECT * FROM events WHERE user_id = ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);

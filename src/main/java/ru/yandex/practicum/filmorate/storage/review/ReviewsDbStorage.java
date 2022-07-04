@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component("reviewsDbStorage")
-public class ReviewsDbStorage implements ReviewsStorage {
+public class ReviewsDbStorage implements ReviewsStorage {  // класс для обращения к БД отзывов
     private final JdbcTemplate jdbcTemplate;
 
     public ReviewsDbStorage(JdbcTemplate jdbcTemplate) {
@@ -78,7 +78,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     @Override
-    public List<Review> getReviewsByFilmId(int id, int count) {
+    public List<Review> getReviewsByFilmId(int id, int count) {  // получить список отзывов по конкретному фильму
         String sqlQuery = "SELECT review.review_id, review_content, is_positive, user_id, film_id, " +
                 "COALESCE(useful.usefulness, 0) AS usefulness FROM review LEFT JOIN (SELECT review_id, " +
                 "SUM(like_dislike) AS usefulness FROM review_usefulness GROUP BY review_id) AS useful USING (review_id) " +
@@ -90,28 +90,28 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     @Override
-    public void putLike(int reviewId, int userId) {
+    public void putLike(int reviewId, int userId) {  // добавить отзыву +1 (лайк)
         String sqlQuery = "INSERT INTO review_usefulness (review_id, user_id, like_dislike) VALUES (?, ?, 1)";
 
         jdbcTemplate.update(sqlQuery, reviewId, userId);
     }
 
     @Override
-    public void putDislike(int reviewId, int userId) {
+    public void putDislike(int reviewId, int userId) {  // добавить отзыву -1 (дизлайк)
         String sqlQuery = "INSERT INTO review_usefulness (review_id, user_id, like_dislike) VALUES (?, ?, -1)";
 
         jdbcTemplate.update(sqlQuery, reviewId, userId);
     }
 
     @Override
-    public void deleteLike(int reviewId, int userId) {
+    public void deleteLike(int reviewId, int userId) {  // удалить лайк
         String sqlQuery = "DELETE FROM review_usefulness WHERE review_id = ? AND user_id = ? AND like_dislike = 1";
 
         jdbcTemplate.update(sqlQuery, reviewId, userId);
     }
 
     @Override
-    public void deleteDislike(int reviewId, int userId) {
+    public void deleteDislike(int reviewId, int userId) {  // удалить дизлайк
         String sqlQuery = "DELETE FROM review_usefulness WHERE review_id = ? AND user_id = ? AND like_dislike = -1";
 
         jdbcTemplate.update(sqlQuery, reviewId, userId);

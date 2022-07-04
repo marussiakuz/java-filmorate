@@ -274,7 +274,7 @@ class FilmorateApplicationTests {
 
         assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
 
-        userDbStorage.deleteUserByIdStorage(userDel.getId());
+        userDbStorage.deleteUserById(userDel.getId());
 
         assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "users"));
     }
@@ -298,7 +298,7 @@ class FilmorateApplicationTests {
 
         assertEquals(6, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 
-        filmDbStorage.deleteFilmByIdStorage(filmDel.getId());
+        filmDbStorage.deleteFilmById(filmDel.getId());
 
         assertEquals(5, JdbcTestUtils.countRowsInTable(jdbcTemplate, "film"));
 

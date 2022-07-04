@@ -129,7 +129,7 @@ public class UserService {
 
     public void deleteUserByIdService(int userId) {
         validate(userId);
-        userStorage.deleteUserByIdStorage(userId);
+        userStorage.deleteUserById(userId);
         log.debug(String.format("the user with id=%s was deleted", userId));
     }
 

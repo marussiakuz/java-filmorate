@@ -75,7 +75,7 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
     }
 
     @Override
-    public List<Film> getMostFilmsYear(int directorId) {
+    public List<Film> getMostFilmsYear(int directorId) {  // Возвращает список фильмов режиссера отсортированных по году выпуска
         String sq = "SELECT * FROM film AS f LEFT JOIN film_director AS fd ON f.film_id = fd.film_id LEFT JOIN rating r " +
                 "ON f.rating_id = R.rating_id WHERE fd.director_id = ? ORDER BY f.release_Date";
 
@@ -88,7 +88,7 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
     }
 
     @Override
-    public List<Film> getMostFilmsLikes(int directorId) {
+    public List<Film> getMostFilmsLikes(int directorId) {  // Возвращает список фильмов режиссера отсортированных по количеству лайков
         String sq = "SELECT * FROM film AS f LEFT JOIN likes AS l ON f.film_id = l.film_id LEFT JOIN film_director " +
                 "AS fd ON f.film_id = fd.film_id LEFT JOIN rating r ON f.rating_id = r.rating_id WHERE fd.director_id = ? " +
                 "GROUP BY f.film_id ORDER BY COUNT(l.film_id) DESC";

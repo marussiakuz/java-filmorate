@@ -17,5 +17,5 @@ public interface UserStorage {    // управление списком пол�
     List<User> getCommonFriends(int userId, int otherUserId);
     boolean doesUserExist(int userId);
     boolean doesFriendExist(int userId, int friendId);
-    void deleteUserByIdStorage(int userId);
+    void deleteUserById(int userId);
 }

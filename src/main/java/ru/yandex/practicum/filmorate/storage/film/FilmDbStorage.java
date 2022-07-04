@@ -120,7 +120,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     }
 
     @Override
-    public List<Film> getCommonFilms(int user_id, int friend_id) {
+    public List<Film> getCommonFilms(int user_id, int friend_id) {  // получить список общих с другим пользователем фильмов
         String sqlQuery = "SELECT * FROM film LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
                 "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT " +
                 "JOIN  likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
@@ -154,7 +154,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     }
 
     @Override
-    public List<Director> getDirectorsByFilmId(int filmId) {
+    public List<Director> getDirectorsByFilmId(int filmId) {  // получить список режиссеров по id фильма
         String sqlQuery = "SELECT * FROM director RIGHT JOIN (SELECT director_id FROM film_director WHERE film_id = ?) " +
                 "USING(director_id)";
 
@@ -162,7 +162,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     }
 
     @Override
-    public List<Film> search(String query, List<String> title) {
+    public List<Film> search(String query, List<String> title) {  // поиск по названию фильмов и по режиссёру
         String sql = null;
 
         if (title.size() == 1) {
@@ -207,11 +207,12 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     }
 
     @Override
-    public void deleteFilmByIdStorage(int filmId) {
+    public void deleteFilmById(int filmId) {
         String sqlQuery = "DELETE FROM film WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
 
+    // получить список самых популярных фильмов по году и по жанру
     @Override
     public List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
         String sqlQuery = "SELECT * FROM film LEFT JOIN film_genre fg ON film.film_id = fg.film_id LEFT JOIN genre g " +
@@ -225,6 +226,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         return foYearFoGenre;
     }
 
+    // получить список самых популярных фильмов по году
     @Override
     public List<Film> getPopularFilmFoYear(int year, int count) {
         String sqlQuery = "SELECT * FROM film LEFT JOIN film_genre fg ON film.film_id = fg.film_id LEFT JOIN genre g " +
@@ -238,6 +240,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         return foYear;
     }
 
+    // получить список самых популярных фильмов по жанру
     @Override
     public List<Film> getPopularFilmFoGenre(int genreId, int count) {
         String sqlQuery = "SELECT * FROM film LEFT JOIN film_genre fg ON film.film_id = fg.film_id LEFT JOIN genre g " +
@@ -251,6 +254,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         return foGenre;
     }
 
+    // Возвращает рекомендации по фильмам для просмотра
     @Override
     public List<Film> getRecommendations(int userId) {
         String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +

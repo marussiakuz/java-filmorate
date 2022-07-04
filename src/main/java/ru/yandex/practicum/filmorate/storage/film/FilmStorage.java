@@ -18,7 +18,7 @@ public interface FilmStorage {    // управление списком фил�
     List<Film> getCommonFilms(int user_id, int friend_id);
     boolean doesFilmExist(int id);
     boolean doesLikeExist(int filmId, int userId);
-    void deleteFilmByIdStorage(int filmId);
+    void deleteFilmById(int filmId);
     List<Film> search(String query, List<String> title);
     List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count);
     List<Film> getPopularFilmFoYear(int year, int count);

@@ -145,7 +145,7 @@ public class FilmService {
 
     public void deleteFilmByIdService(int filmId) {
         validateFilm(filmId);
-        filmStorage.deleteFilmByIdStorage(filmId);
+        filmStorage.deleteFilmById(filmId);
         log.debug(String.format("the film with id=%s was deleted", filmId));
     }
 

@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 
-public interface MapperToFilm {
+public interface MapperToFilm {  // объединяет методы маппинга из json в Film, Genre, Director
 
     default Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int filmId = resultSet.getInt("film_id");
