@@ -29,8 +29,7 @@ public class FilmController extends AbstractController<Film> {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
-        return film;
+        return filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
     }
 
     @GetMapping(value = "/{id}")
@@ -66,7 +65,7 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/common")
-    public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
+    public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
 
