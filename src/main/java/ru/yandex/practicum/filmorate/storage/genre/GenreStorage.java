@@ -11,4 +11,6 @@ public interface GenreStorage {
     Genre getGenreById(int id);
 
     boolean doesGenreExist(int id);
+
+     List<Genre> getGenresByFilmId(int filmId);
 }

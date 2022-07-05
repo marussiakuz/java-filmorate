@@ -45,4 +45,10 @@ public class GenreDbStorage implements GenreStorage {
                 .name(resultSet.getString("name_genre"))
                 .build();
     }
+    public List<Genre> getGenresByFilmId(int filmId) {
+        String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
+                "USING(genre_id)";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
+    }
 }

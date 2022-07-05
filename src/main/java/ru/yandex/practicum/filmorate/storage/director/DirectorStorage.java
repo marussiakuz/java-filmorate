@@ -22,9 +22,6 @@ public interface DirectorStorage {
 
     boolean isDirectorExists(Integer id);
 
-    List<Film> getMostFilmsYear(int count);
-
-    List<Film> getMostFilmsLiks(int count);
 
 
 }

@@ -110,11 +110,11 @@ public class FilmService {
         String sortParameter = param.get();
         switch (sortParameter) {
             case "year": {
-                List<Film> films = directorStorage.getMostFilmsYear(directorId);
+                List<Film> films = filmStorage.getMostFilmsYear(directorId);
                 return films;
             }
             case "likes": {
-                List<Film> films = directorStorage.getMostFilmsLiks(directorId);
+                List<Film> films = filmStorage.getMostFilmsLiks(directorId);
                 return films;
             }
             default:
