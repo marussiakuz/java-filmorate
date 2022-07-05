@@ -99,10 +99,6 @@ public class FilmService {
         log.debug("the delete like event was completed successfully");
     }
 
-    public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getMostPopularFilms(count);
-    }
-
     public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
         if (param.isEmpty())
             throw new ValidationException("Attempt to get sorted films with empty parameter");
@@ -143,7 +139,7 @@ public class FilmService {
                     filmId, userId));
     }
 
-    public void deleteFilmByIdService(int filmId) {
+    public void deleteFilmById(int filmId) {
         validateFilm(filmId);
         filmStorage.deleteFilmById(filmId);
         log.debug(String.format("the film with id=%s was deleted", filmId));
@@ -158,23 +154,32 @@ public class FilmService {
     }
 
     public List<Film> search(String query, List<String> title) {
-        return filmStorage.search(query, title);
+        if (query != null && title != null) return filmStorage.search(query, title);
+        return filmStorage.getMostPopularFilms(100);
     }
 
-    public List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
+    public List<Film> getMostPopularFilms(Integer year, Integer genreId, int count) {
+        if (genreId != null || year != null) {
+            return genreId != null && year != null ? getPopularFilmFoYearFoGenre(year, genreId, count) : genreId != null ?
+                    getPopularFilmFoGenre(genreId, count) : getPopularFilmFoYear(year, count);
+        }
+        return filmStorage.getMostPopularFilms(count);
+    }
+
+    private List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
         validateYear(year);
         validateGenre(genreId);
 
         return filmStorage.getPopularFilmFoYearFoGenre(year, genreId, count);
     }
 
-    public List<Film> getPopularFilmFoYear(int year, int count) {
+    private List<Film> getPopularFilmFoYear(int year, int count) {
         validateYear(year);
 
         return filmStorage.getPopularFilmFoYear(year, count);
     }
 
-    public List<Film> getPopularFilmFoGenre(int genreId, int count) {
+    private List<Film> getPopularFilmFoGenre(int genreId, int count) {
         validateGenre(genreId);
 
         return filmStorage.getPopularFilmFoGenre(genreId, count);

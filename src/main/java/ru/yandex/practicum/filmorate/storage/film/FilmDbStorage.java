@@ -258,7 +258,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     @Override
     public List<Film> getRecommendations(int userId) {
         String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
-                "WHERE l1.USER_ID = ? AND l1.USER_ID<>l2.USER_ID GROUP BY l1.USER_ID , l2.USER_ID " +
+                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
                 "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
 
         List<Integer> bestUsersId = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);

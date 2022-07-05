@@ -48,20 +48,15 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                      @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
-                                      @RequestParam(value = "year", required = false) Optional<Integer> year) {
-        if (genreId.isPresent() || year.isPresent())
-            return genreId.isPresent() && year.isPresent() ?
-                    filmService.getPopularFilmFoYearFoGenre(year.get(), genreId.get(), count) : genreId.isPresent() ?
-                    filmService.getPopularFilmFoGenre(genreId.get(), count) :
-                    filmService.getPopularFilmFoYear(year.get(), count);
-        return filmService.getMostPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = "10") int count,
+                                      @RequestParam(value = "genreId", required = false) Integer genreId,
+                                      @RequestParam(value = "year", required = false) Integer year) {
+        return filmService.getMostPopularFilms(year, genreId, count);
     }
 
     @DeleteMapping(value = "/{filmId}")
     public void deleteFilmById(@PathVariable(value = "filmId") Integer filmId) {
-        filmService.deleteFilmByIdService(filmId);
+        filmService.deleteFilmById(filmId);
     }
 
     @GetMapping(value = "/common")
@@ -70,10 +65,9 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/search")
-    public List<Film> search(@RequestParam(value = "query", required = false) Optional<String> query,
-                             @RequestParam(value = "by", required = false) Optional<List<String>> title) {
-        if (query.isPresent() && title.isPresent()) return filmService.search(query.get(), title.get());
-        return filmService.getMostPopularFilms(100);
+    public List<Film> search(@RequestParam(value = "query", required = false) String query,
+                             @RequestParam(value = "by", required = false) List<String> title) {
+        return filmService.search(query, title);
     }
 
     @GetMapping("/director/{directorId}")
