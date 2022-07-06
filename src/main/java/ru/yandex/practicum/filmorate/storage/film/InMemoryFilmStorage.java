@@ -90,6 +90,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getMostFilmsYear(int count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
+
+    @Override
+    public List<Film> getMostFilmsLikes(int count) {
+        throw new UnsupportedOperationException("UnsupportedOperation");
+    }
+
+    @Override
     public List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }

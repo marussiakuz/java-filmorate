@@ -24,6 +24,7 @@ public class Review {
     private int filmId;
     private int useful;
 
+    @JsonProperty("reviewId")
     public Integer getId() {
         return id;
     }

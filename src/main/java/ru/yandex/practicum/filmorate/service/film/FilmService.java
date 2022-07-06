@@ -130,14 +130,16 @@ public class FilmService {
         String sortParameter = param.get();
         switch (sortParameter) {
             case "year": {
-                sortedFilms = directorStorage.getMostFilmsYear(directorId);
+                sortedFilms = filmStorage.getMostFilmsYear(directorId);
                 sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
+                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
                 sortedFilms.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
                 break;
             }
             case "likes": {
-                System.out.println("здесь");
-                sortedFilms = directorStorage.getMostFilmsLikes(directorId);
+                sortedFilms = filmStorage.getMostFilmsLikes(directorId);
+                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
                 sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
                 break;
             }

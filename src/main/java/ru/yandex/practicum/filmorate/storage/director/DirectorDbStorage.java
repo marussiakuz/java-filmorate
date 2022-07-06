@@ -74,32 +74,6 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
         return count > 0;
     }
 
-    @Override
-    public List<Film> getMostFilmsYear(int directorId) {  // Возвращает список фильмов режиссера отсортированных по году выпуска
-        String sq = "SELECT * FROM film AS f LEFT JOIN film_director AS fd ON f.film_id = fd.film_id LEFT JOIN rating r " +
-                "ON f.rating_id = R.rating_id WHERE fd.director_id = ? ORDER BY f.release_Date";
-
-        List<Film> yearFilms = jdbcTemplate.query(sq, this::mapRowToFilm, directorId);
-
-        yearFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
-        yearFilms.stream().map(Film::getGenres).filter(genres -> genres.size() == 0).forEach(genres -> genres = null);
-
-        return yearFilms;
-    }
-
-    @Override
-    public List<Film> getMostFilmsLikes(int directorId) {  // Возвращает список фильмов режиссера отсортированных по количеству лайков
-        String sq = "SELECT * FROM film AS f LEFT JOIN likes AS l ON f.film_id = l.film_id LEFT JOIN film_director " +
-                "AS fd ON f.film_id = fd.film_id LEFT JOIN rating r ON f.rating_id = r.rating_id WHERE fd.director_id = ? " +
-                "GROUP BY f.film_id ORDER BY COUNT(l.film_id) DESC";
-
-        List<Film> yearFilms = jdbcTemplate.query(sq, new Object[]{directorId}, this::mapRowToFilm);
-        yearFilms.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
-        yearFilms.stream().map(Film::getGenres).filter(genres -> genres.size() == 0).forEach(genres -> genres = null);
-
-        return yearFilms;
-    }
-
     private List<Genre> getGenresByFilmId(int filmId) {
         String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
                 "USING(genre_id)";

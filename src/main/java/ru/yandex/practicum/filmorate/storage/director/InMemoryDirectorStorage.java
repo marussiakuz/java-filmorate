@@ -37,16 +37,6 @@ public class InMemoryDirectorStorage implements DirectorStorage {
     }
 
     @Override
-    public List<Film> getMostFilmsYear(int directorId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<Film> getMostFilmsLikes(int directorId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public List<Director> fillDirector(int filmId) {
         throw new UnsupportedOperationException();
     }

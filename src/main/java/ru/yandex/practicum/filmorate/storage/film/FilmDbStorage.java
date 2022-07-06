@@ -122,7 +122,6 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         return count > 0;
     }
 
-
     @Override
     public List<Film> search(String query, List<String> title) {  // поиск по названию фильмов и по режиссёру
         String format = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
@@ -212,5 +211,22 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
                 "WHERE USER_ID = ?)) AS r ON r.film_id = film.film_id";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUsersId.get(0), userId);
+    }
+
+    @Override
+    public List<Film> getMostFilmsYear(int directorId) {  // Возвращает список фильмов режиссера отсортированных по году выпуска
+        String sq = "SELECT * FROM film AS f LEFT JOIN film_director AS fd ON f.film_id = fd.film_id LEFT JOIN rating r " +
+                "ON f.rating_id = R.rating_id WHERE fd.director_id = ? ORDER BY f.release_Date";
+
+        return jdbcTemplate.query(sq, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> getMostFilmsLikes(int directorId) {  // Возвращает список фильмов режиссера отсортированных по количеству лайков
+        String sq = "SELECT * FROM film AS f LEFT JOIN likes AS l ON f.film_id = l.film_id LEFT JOIN film_director " +
+                "AS fd ON f.film_id = fd.film_id LEFT JOIN rating r ON f.rating_id = r.rating_id WHERE fd.director_id = ? " +
+                "GROUP BY f.film_id ORDER BY COUNT(l.film_id) DESC";
+
+        return jdbcTemplate.query(sq, new Object[]{directorId}, this::mapRowToFilm);
     }
 }

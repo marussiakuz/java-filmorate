@@ -53,6 +53,7 @@ public class GenreDbStorage implements GenreStorage {
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
     }
+
     public void addGenresToTheFilm(Film film) {
         if (film.getGenres() == null || film.getGenres().isEmpty())
             return;
@@ -66,6 +67,7 @@ public class GenreDbStorage implements GenreStorage {
 
         film.setGenres(fillGenre(film.getId()));
     }
+
     public void deleteGenresByFilmId(int filmId) {
         String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
 
