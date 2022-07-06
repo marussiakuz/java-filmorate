@@ -106,4 +106,29 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
     }
+
+    public List<Director> fillDirector(int filmId) {  // получить список режиссеров по id фильма
+        String sqlQuery = "SELECT * FROM director RIGHT JOIN (SELECT director_id FROM film_director WHERE film_id = ?) " +
+                "USING(director_id)";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
+    }
+    public void addDirectorToTheFilm(Film film) {
+        if (film.getDirectors() == null || film.getDirectors().isEmpty())
+            return;
+
+        String sqlQuery = "INSERT INTO film_director(film_id, director_id) SELECT ?, ?";
+
+        film.getDirectors().stream()
+                .mapToInt(Director::getId)
+                .distinct()
+                .forEach(directorId -> jdbcTemplate.update(sqlQuery, film.getId(), directorId));
+
+        film.setDirectors(fillDirector(film.getId()));
+    }
+    public void deleteDirectorsByFilmId(int filmId) {
+        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE film_id = ?";
+
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
 }

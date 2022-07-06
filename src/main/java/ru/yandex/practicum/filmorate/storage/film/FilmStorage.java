@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface FilmStorage {    // управление списком фильмов
 
     List<Film> getAllFilms();
-    void add(Film film);
+    Film add(Film film);
     void update(Film film);
     Optional<Film> getFilmById(int id);
     void addLike(int filmId, int userId);
@@ -23,6 +23,5 @@ public interface FilmStorage {    // управление списком фил�
     List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count);
     List<Film> getPopularFilmFoYear(int year, int count);
     List<Film> getPopularFilmFoGenre(int genreId, int count);
-    List<Director> getDirectorsByFilmId(int filmId);
     List<Film> getRecommendations(int userId);
 }

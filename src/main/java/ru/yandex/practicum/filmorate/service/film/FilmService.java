@@ -8,8 +8,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.InvalidDataException;
 import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.FilmAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.*;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.service.director.DirectorService;
+import ru.yandex.practicum.filmorate.service.genre.GenreService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -19,6 +23,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import javax.validation.ValidationException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -29,21 +34,30 @@ public class FilmService {
     private final RatingStorage ratingStorage;
     private final EventStorage eventStorage;
     private final DirectorStorage directorStorage;
+    private final GenreService genreService;
+    private final DirectorService directorService;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("directorDbStorage") DirectorStorage directorStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("ratingDbStorage") RatingStorage ratingStorage,
-                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
+                       @Qualifier("eventDbStorage") EventStorage eventStorage,
+                       GenreService genreService,
+                       DirectorService directorService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.directorStorage = directorStorage;
         this.ratingStorage = ratingStorage;
         this.eventStorage = eventStorage;
+        this.genreService = genreService;
+        this.directorService = directorService;
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        List<Film> all = filmStorage.getAllFilms();
+        all.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
+        all.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
+        return all;
     }
 
     public Film add(Film film) {
@@ -54,7 +68,8 @@ public class FilmService {
         log.debug(String.format("new film with id=%s added successfully", film.getId()));
 
         film.setMpa(ratingStorage.getRatingById(film.getMpa().getId()));
-
+        if (film.getGenres() != null) genreService.addGenresToTheFilm(film);
+        if (film.getDirectors() != null) directorService.addDirectorToTheFilm(film);
         return film;
     }
 
@@ -62,6 +77,7 @@ public class FilmService {
         validateFilm(film.getId());
 
         filmStorage.update(film);
+        updateDirectorsAndGenres(film);
         log.debug(String.format("film data with id=%s has been successfully updated", film.getId()));
 
         return film;
@@ -71,6 +87,13 @@ public class FilmService {
         validateFilm(id);
 
         Optional<Film> optionalFilm = filmStorage.getFilmById(id);
+        if (optionalFilm.isPresent()) {
+            List<Genre> genres = genreService.fillGenre(id);
+            optionalFilm.get().setGenres(genres.isEmpty() ? null : genres);
+
+            List<Director> directors = directorService.fillDirector(id);
+            optionalFilm.get().setDirectors(directors);
+        }
         if (optionalFilm.isEmpty())
             throw new FilmNotFoundException(String.format("Film with id=%s not found", id));
 
@@ -111,14 +134,14 @@ public class FilmService {
         switch (sortParameter) {
             case "year": {
                 sortedFilms = directorStorage.getMostFilmsYear(directorId);
-                sortedFilms.forEach(film -> film.setDirectors(filmStorage.getDirectorsByFilmId(film.getId())));
+                sortedFilms.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
                 sortedFilms.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
                 break;
             }
             case "likes": {
                 System.out.println("здесь");
                 sortedFilms = directorStorage.getMostFilmsLikes(directorId);
-                sortedFilms.forEach(film -> film.setDirectors(filmStorage.getDirectorsByFilmId(film.getId())));
+                sortedFilms.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
                 break;
             }
             default:
@@ -150,11 +173,22 @@ public class FilmService {
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
         if (!userStorage.doesUserExist(friendId))
             throw new UserNotFoundException(String.format("User with id=%s not found", friendId));
-        return filmStorage.getCommonFilms(userId, friendId);
+        List<Film> common = filmStorage.getCommonFilms(userId, friendId);
+
+        common.stream()
+                .filter(film -> !genreService.fillGenre(film.getId()).isEmpty())
+                .forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
+        return common;
     }
 
     public List<Film> search(String query, List<String> title) {
-        if (query != null && title != null) return filmStorage.search(query, title);
+        if (query != null && title != null) {
+            List<Film> searchList = filmStorage.search(query, title);
+            searchList.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
+            searchList.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
+            return searchList;
+        }
+
         return filmStorage.getMostPopularFilms(100);
     }
 
@@ -163,25 +197,31 @@ public class FilmService {
             return genreId != null && year != null ? getPopularFilmFoYearFoGenre(year, genreId, count) : genreId != null ?
                     getPopularFilmFoGenre(genreId, count) : getPopularFilmFoYear(year, count);
         }
-        return filmStorage.getMostPopularFilms(count);
+        List<Film> popular = filmStorage.getMostPopularFilms(count);
+        popular.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
+        popular.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
+        return popular;
     }
 
     private List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
         validateYear(year);
         validateGenre(genreId);
-
-        return filmStorage.getPopularFilmFoYearFoGenre(year, genreId, count);
+        List<Film> foYearFoGenre = filmStorage.getPopularFilmFoYearFoGenre(year, genreId, count);
+        foYearFoGenre.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
+        return foYearFoGenre;
     }
 
     private List<Film> getPopularFilmFoYear(int year, int count) {
         validateYear(year);
-
+        List<Film> foYear = filmStorage.getPopularFilmFoYear(year, count);
+        foYear.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
         return filmStorage.getPopularFilmFoYear(year, count);
     }
 
     private List<Film> getPopularFilmFoGenre(int genreId, int count) {
         validateGenre(genreId);
-
+        List<Film> foGenre = filmStorage.getPopularFilmFoGenre(genreId, count);
+        foGenre.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
         return filmStorage.getPopularFilmFoGenre(genreId, count);
     }
 
@@ -195,4 +235,16 @@ public class FilmService {
             throw new InvalidDataException(year < 0 ? "negative param" : "Release date may not be earlier than " +
                     "28.12.1895");
     }
+    private void updateDirectorsAndGenres(Film film) {
+        directorService.deleteDirectorsByFilmId(film.getId());
+        if (film.getDirectors() != null) directorService.addDirectorToTheFilm(film);
+
+        if (film.getGenres() != null) {
+            genreService.deleteGenresByFilmId(film.getId());
+            genreService.addGenresToTheFilm(film);
+        }
+    }
+
+
+
 }

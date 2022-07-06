@@ -19,7 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void add(Film film) {
+    public Film add(Film film) {
         if (film.getId() == null || film.getId() == 0) {
             if (films.isEmpty())
                 film.setId(1);
@@ -29,6 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             }
         }
         films.put(film.getId(), film);
+        return film;
     }
 
     @Override
@@ -104,10 +105,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
 
-    @Override
-    public List<Director> getDirectorsByFilmId(int filmId) {
-        throw new UnsupportedOperationException("UnsupportedOperation");
-    }
 
     @Override
     public List<Film> getRecommendations(int userId) {

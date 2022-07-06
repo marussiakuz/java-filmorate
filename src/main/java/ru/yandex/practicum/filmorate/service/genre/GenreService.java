@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.GenreNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
@@ -32,5 +33,15 @@ public class GenreService {
     private void validate(int id) {
         if (!genreStorage.doesGenreExist(id))
             throw new GenreNotFoundException(String.format("Genre with id=%s not found", id));
+    }
+
+    public List<Genre> fillGenre(int filmId){
+        return genreStorage.fillGenre(filmId);
+    }
+    public void addGenresToTheFilm(Film film){
+        genreStorage.addGenresToTheFilm(film);
+    }
+   public void deleteGenresByFilmId(int filmId){
+        genreStorage.deleteGenresByFilmId(filmId);
     }
 }
