@@ -48,16 +48,16 @@ public class InMemoryDirectorStorage implements DirectorStorage {
 
     @Override
     public List<Director> fillDirector(int filmId) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void addDirectorToTheFilm(Film film) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteDirectorsByFilmId(int filmId) {
-
+        throw new UnsupportedOperationException();
     }
 }

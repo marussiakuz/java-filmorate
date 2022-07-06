@@ -5,9 +5,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.MapperToFilm;
 
 import java.sql.PreparedStatement;
@@ -28,8 +26,8 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     @Override
     public List<Film> getAllFilms() {
         String sqlQuery = "SELECT * FROM film LEFT JOIN rating USING(rating_id)";
-        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
-        return films;
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     @Override
@@ -63,7 +61,6 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
                 film.getDuration().toMinutes(),
                 film.getMpa().getId(),
                 film.getId());
-
     }
 
     @Override
@@ -71,19 +68,20 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         String sqlQuery = "SELECT * FROM film INNER JOIN rating USING (rating_id) WHERE film_id = ?";
         Film film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
 
-
         return Optional.ofNullable(film);
     }
 
     @Override
     public void addLike(int filmId, int userId) {
         String sqlQuery = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
+
         jdbcTemplate.update(sqlQuery, userId, filmId);
     }
 
     @Override
     public void deleteLike(int filmId, int userId) {
         String sqlQuery = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
+
         jdbcTemplate.update(sqlQuery, userId, filmId);
     }
 
@@ -111,6 +109,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
         String sql = "SELECT COUNT(*) FROM film WHERE film_id = ?";
 
         int count = jdbcTemplate.queryForObject(sql, new Object[]{filmId}, Integer.class);
+
         return count > 0;
     }
 
@@ -126,8 +125,6 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
 
     @Override
     public List<Film> search(String query, List<String> title) {  // поиск по названию фильмов и по режиссёру
-        String sql = null;
-
         String format = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
                 "LEFT JOIN film_director fd on film.film_id = fd.film_id LEFT JOIN director d " +
                 "ON fd.director_id = d.director_id WHERE LOWER (name_director) LIKE '%s'", "%" + query.toLowerCase() + "%");
@@ -215,8 +212,5 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
                 "WHERE USER_ID = ?)) AS r ON r.film_id = film.film_id";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUsersId.get(0), userId);
-
     }
-
-
 }

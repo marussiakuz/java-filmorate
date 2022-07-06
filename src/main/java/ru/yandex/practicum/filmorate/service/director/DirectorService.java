@@ -60,14 +60,4 @@ public class DirectorService {
             throw new DirectorNotFoundException(String.format("Director with id=%s not found", directorId));
         log.debug(String.format("Attempt to add/remove/update the director using missing id = %s", directorId));
     }
-
-    public List<Director> fillDirector(int filmId) {
-        return directorStorage.fillDirector(filmId);
-    }
-    public void addDirectorToTheFilm(Film film){
-        directorStorage.addDirectorToTheFilm(film);
-    }
-   public void deleteDirectorsByFilmId(int filmId){
-        directorStorage.deleteDirectorsByFilmId(filmId);
-    }
 }

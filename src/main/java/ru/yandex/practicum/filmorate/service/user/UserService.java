@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.UserAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.UserNotFoundException;
+
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
+
 import ru.yandex.practicum.filmorate.service.genre.GenreService;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -83,7 +85,7 @@ public class UserService {
         log.debug(String.format("The user with id=%s has added the user with id=%s to friends", userId, friendId));
 
         eventStorage.addAddEvent(userId, friendId, EventType.FRIEND);
-        log.debug(String.format("the add friend event was completed successfully"));
+        log.debug("the add friend event was completed successfully");
     }
 
     public void deleteFriend(int userId, int friendId) {
@@ -93,7 +95,7 @@ public class UserService {
         log.debug(String.format("The user with id=%s has removed the user with id=%s from friends", userId, friendId));
 
         eventStorage.addRemoveEvent(userId, friendId, EventType.FRIEND);
-        log.debug(String.format("the remove friend event was completed successfully"));
+        log.debug("the remove friend event was completed successfully");
     }
 
     public List<User> getAllFriends(int userId) {

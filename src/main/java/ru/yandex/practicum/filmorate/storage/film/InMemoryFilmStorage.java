@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotImplementedException;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -104,7 +103,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getPopularFilmFoGenre(int genreId, int count) {
         throw new UnsupportedOperationException("UnsupportedOperation");
     }
-
 
     @Override
     public List<Film> getRecommendations(int userId) {

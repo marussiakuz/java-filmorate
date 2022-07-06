@@ -23,16 +23,16 @@ public class InMemoryGenreStorage implements GenreStorage {
 
     @Override
     public List<Genre> fillGenre(int filmId) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void addGenresToTheFilm(Film film) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteGenresByFilmId(int filmId) {
-
+        throw new UnsupportedOperationException();
     }
 }

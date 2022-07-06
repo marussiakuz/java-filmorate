@@ -75,6 +75,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUserById(int userId) {
-
+        throw new UnsupportedOperationException();
     }
 }
