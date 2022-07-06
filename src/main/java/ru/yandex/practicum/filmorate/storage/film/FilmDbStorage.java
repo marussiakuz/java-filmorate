@@ -128,30 +128,29 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     public List<Film> search(String query, List<String> title) {  // поиск по названию фильмов и по режиссёру
         String sql = null;
 
+        String format = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
+                "LEFT JOIN film_director fd on film.film_id = fd.film_id LEFT JOIN director d " +
+                "ON fd.director_id = d.director_id WHERE LOWER (name_director) LIKE '%s'", "%" + query.toLowerCase() + "%");
+        String s = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
+                "WHERE LOWER (title) LIKE  '%s'", "%" + query.toLowerCase() + "%");
         if (title.size() == 1) {
             if (title.contains("title")) {
-                sql = "SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id WHERE LOWER (TITLE) " +
-                        "LIKE '%s', \"%?%\"";
-                return jdbcTemplate.query(sql, this::mapRowToFilm);
+                String sqlTitle = s;
+                return jdbcTemplate.query(sqlTitle, this::mapRowToFilm);
             }
             if (title.contains("director")) {
-                sql = "SELECT * FROM film LEFT JOIN rating R ON FILM.RATING_ID = r.rating_id LEFT JOIN film_director fd " +
-                        "ON film.film_id = fd.film_id LEFT JOIN director d ON fd.director_id = d.director_id " +
-                        "WHERE LOWER (name_director) LIKE '%s', \"%?%\"";
-                return jdbcTemplate.query(sql, this::mapRowToFilm);
+                String sqlDirector = format;
+                return jdbcTemplate.query(sqlDirector, this::mapRowToFilm);
             }
         }
 
         if (title.size() == 2) {
             if (title.contains("title") && title.contains("director")) {
-                String sqlTitle = "SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
-                        "WHERE LOWER (title) LIKE  '%s', \"%?%\"";
+                String sqlTitle = s;
 
-                String sqlDirector = "SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
-                        "LEFT JOIN film_director fd on film.film_id = fd.film_id LEFT JOIN director d " +
-                        "ON fd.director_id = d.director.id WHERE LOWER (name_director) LIKE '%s', \"%?%\"";
+                String sqlDirector = format;
 
-                List<Film> searchAll = jdbcTemplate.query(sqlDirector, this::mapRowToFilm, query.toLowerCase());
+                List<Film> searchAll = jdbcTemplate.query(sqlDirector, this::mapRowToFilm);
                 searchAll.addAll(jdbcTemplate.query(sqlTitle, this::mapRowToFilm));
                 return searchAll;
             }

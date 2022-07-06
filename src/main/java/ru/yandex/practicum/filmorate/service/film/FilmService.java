@@ -186,6 +186,11 @@ public class FilmService {
             List<Film> searchList = filmStorage.search(query, title);
             searchList.forEach(film -> film.setGenres(genreService.fillGenre(film.getId())));
             searchList.forEach(film -> film.setDirectors(directorService.fillDirector(film.getId())));
+            for (Film film : searchList) {
+                if (film.getGenres().size() == 0) {
+                    film.setGenres(null);
+                }
+            }
             return searchList;
         }
 
