@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.service.genre.GenreService;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -26,14 +27,16 @@ public class UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
     private final FilmStorage filmStorage;
+    private final GenreService genreService;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage,
-                       @Qualifier("filmDbStorage") FilmStorage filmStorage) {
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage, GenreService genreService) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
         this.filmStorage = filmStorage;
+        this.genreService = genreService;
     }
 
     public List<User> getAllUsers() {
@@ -134,6 +137,14 @@ public class UserService {
     }
 
     public List<Film> getRecommendations(int userId) {
-        return filmStorage.getRecommendations(userId);
+        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId);
+        if (!recommendationsFilms.isEmpty()) {
+            for (Film f : recommendationsFilms) {
+                if (!genreService.fillGenre(f.getId()).isEmpty()) {
+                    f.setGenres(genreService.fillGenre(f.getId()));
+                }
+            }
+        }
+        return recommendationsFilms;
     }
 }

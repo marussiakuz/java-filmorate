@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
@@ -18,5 +19,20 @@ public class InMemoryGenreStorage implements GenreStorage {
     @Override
     public boolean doesGenreExist(int id) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Genre> fillGenre(int filmId) {
+        return null;
+    }
+
+    @Override
+    public void addGenresToTheFilm(Film film) {
+
+    }
+
+    @Override
+    public void deleteGenresByFilmId(int filmId) {
+
     }
 }

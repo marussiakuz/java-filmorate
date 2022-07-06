@@ -15,4 +15,7 @@ public interface DirectorStorage {
     boolean doesDirectorExist(int id);
     List<Film> getMostFilmsYear(int directorId);
     List<Film> getMostFilmsLikes(int directorId);
+    List<Director> fillDirector(int filmId);
+    void addDirectorToTheFilm(Film film);
+    void deleteDirectorsByFilmId(int filmId);
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.genre;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
@@ -44,5 +45,30 @@ public class GenreDbStorage implements GenreStorage {
                 .id(resultSet.getInt("genre_id"))
                 .name(resultSet.getString("name_genre"))
                 .build();
+    }
+
+    public List<Genre> fillGenre(int filmId) {
+        String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
+                "USING(genre_id)";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
+    }
+    public void addGenresToTheFilm(Film film) {
+        if (film.getGenres() == null || film.getGenres().isEmpty())
+            return;
+
+        String sqlQuery = "INSERT INTO film_genre(film_id, genre_id) SELECT ?, ?";
+
+        film.getGenres().stream()
+                .mapToInt(Genre::getId)
+                .distinct()
+                .forEach(genreId -> jdbcTemplate.update(sqlQuery, film.getId(), genreId));
+
+        film.setGenres(fillGenre(film.getId()));
+    }
+    public void deleteGenresByFilmId(int filmId) {
+        String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
+
+        jdbcTemplate.update(sqlQuery, filmId);
     }
 }
