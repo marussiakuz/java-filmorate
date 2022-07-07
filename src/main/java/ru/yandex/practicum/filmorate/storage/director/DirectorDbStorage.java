@@ -83,9 +83,6 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
 
     @Override
     public void addDirectorToTheFilm(Film film) {
-        if (film.getDirectors() == null || film.getDirectors().isEmpty())
-            return;
-
         String sqlQuery = "INSERT INTO film_director(film_id, director_id) SELECT ?, ?";
 
         film.getDirectors().stream()
@@ -98,7 +95,7 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
 
     @Override
     public void deleteDirectorsByFilmId(int filmId) {
-        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE film_id = ?";
+        String sqlQuery = "DELETE FROM film_director WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
     }

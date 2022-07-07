@@ -66,7 +66,9 @@ public class FilmService {
 
         film.setMpa(ratingStorage.getRatingById(film.getMpa().getId()));
         if (film.getGenres() != null) genreStorage.addGenresToTheFilm(film);
-        if (film.getDirectors() != null) directorStorage.addDirectorToTheFilm(film);
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty())
+            directorStorage.addDirectorToTheFilm(film);
+
         return film;
     }
 
@@ -237,7 +239,9 @@ public class FilmService {
     }
     private void updateDirectorsAndGenres(Film film) {
         directorStorage.deleteDirectorsByFilmId(film.getId());
-        if (film.getDirectors() != null) directorStorage.addDirectorToTheFilm(film);
+
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty())
+            directorStorage.addDirectorToTheFilm(film);
 
         if (film.getGenres() != null) {
             genreStorage.deleteGenresByFilmId(film.getId());
