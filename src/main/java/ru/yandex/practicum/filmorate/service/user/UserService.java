@@ -11,9 +11,9 @@ import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
-import ru.yandex.practicum.filmorate.service.genre.GenreService;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
@@ -26,16 +26,17 @@ public class UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
     private final FilmStorage filmStorage;
-    private final GenreService genreService;
+    private final GenreStorage genreStorage;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage,
-                       @Qualifier("filmDbStorage") FilmStorage filmStorage, GenreService genreService) {
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
         this.filmStorage = filmStorage;
-        this.genreService = genreService;
+        this.genreStorage = genreStorage;
     }
 
     public List<User> getAllUsers() {
@@ -70,8 +71,29 @@ public class UserService {
         if (optionalUser.isEmpty()) {
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
         }
-
         return optionalUser.get();
+    }
+
+    public void deleteUserById(int userId) {
+        validate(userId);
+        userStorage.deleteUserById(userId);
+        log.debug(String.format("the user with id=%s was deleted", userId));
+    }
+
+    public List<Film> getRecommendations(int userId) {
+        if(userStorage.getBestMatchesUserIds(userId).isEmpty()){
+            return new ArrayList<>();
+        }
+        int bestMuchUserId = userStorage.getBestMatchesUserIds(userId).get(0);
+        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId, bestMuchUserId);
+        if (!recommendationsFilms.isEmpty()) {
+            for (Film f : recommendationsFilms) {
+                if (!genreStorage.fillGenre(f.getId()).isEmpty()) {
+                    f.setGenres(genreStorage.fillGenre(f.getId()));
+                }
+            }
+        }
+        return recommendationsFilms;
     }
 
     public void addFriend(int userId, int friendId) {
@@ -127,31 +149,5 @@ public class UserService {
         if (!userStorage.doesFriendExist(userId, friendId))
             throw new FriendNotFoundException(String.format("the user with id=%s does not have a friend with user id=%s",
                     userId, friendId));
-    }
-
-    public void deleteUserByIdService(int userId) {
-        validate(userId);
-        userStorage.deleteUserById(userId);
-        log.debug(String.format("the user with id=%s was deleted", userId));
-    }
-
-    public List<Film> getRecommendations(int userId) {
-        if(getBestMuchUserIds(userId).isEmpty()){
-            return new ArrayList<>();
-        }
-        int bestMuchUserId = getBestMuchUserIds(userId).get(0);
-        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId, bestMuchUserId);
-        if (!recommendationsFilms.isEmpty()) {
-            for (Film f : recommendationsFilms) {
-                if (!genreService.fillGenre(f.getId()).isEmpty()) {
-                    f.setGenres(genreService.fillGenre(f.getId()));
-                }
-            }
-        }
-        return recommendationsFilms;
-    }
-    // возвращает лист пользователей случшими совпадениями по понравившимся фильмам
-    public List<Integer> getBestMuchUserIds(int userId) {
-        return userStorage.getBestMuchUserIds(userId);
     }
 }

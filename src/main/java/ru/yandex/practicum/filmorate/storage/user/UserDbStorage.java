@@ -111,6 +111,22 @@ public class UserDbStorage implements UserStorage {
         return count > 0;
     }
 
+    @Override
+    public void deleteUserById(int userId) {
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+    }
+
+    // возвращает лист пользователей с лучшими совпадениями по понравившимся фильмам
+    @Override
+    public List<Integer> getBestMatchesUserIds(int userId) {
+        String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
+                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
+                "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
+
+        return jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
+    }
+
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
                 .id(resultSet.getInt("user_id"))
@@ -119,20 +135,5 @@ public class UserDbStorage implements UserStorage {
                 .login(resultSet.getString("login"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-    }
-
-    @Override
-    public void deleteUserById(int userId) {
-        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, userId);
-    }
-
-    @Override
-    public List<Integer> getBestMuchUserIds(int userId) {
-        String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
-                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
-                "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
-
-        return jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
     }
 }

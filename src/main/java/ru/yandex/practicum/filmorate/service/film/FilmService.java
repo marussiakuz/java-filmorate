@@ -80,6 +80,12 @@ public class FilmService {
         return film;
     }
 
+    public void deleteFilmById(int filmId) {
+        validateFilm(filmId);
+        filmStorage.deleteFilmById(filmId);
+        log.debug(String.format("the film with id=%s was deleted", filmId));
+    }
+
     public Film getFilmById(int id) {
         validateFilm(id);
 
@@ -122,7 +128,7 @@ public class FilmService {
     public List<Film> getSortedFilmsByDirectorId(Integer directorId, Optional<String> param) {
         if (param.isEmpty())
             throw new ValidationException("Attempt to get sorted films with empty parameter");
-        if (!directorStorage.doesDirectorExist(directorId))
+        if (directorStorage.doesDirectorExist(directorId))
             throw new DirectorNotFoundException(String.format("Attempt to get sorted films with absent director id = %s",
                     directorId));
 
@@ -131,40 +137,20 @@ public class FilmService {
         switch (sortParameter) {
             case "year": {
                 sortedFilms = filmStorage.getMostFilmsYear(directorId);
-                sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
-                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-                sortedFilms.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
                 break;
             }
             case "likes": {
                 sortedFilms = filmStorage.getMostFilmsLikes(directorId);
-                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-                sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-                sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
                 break;
             }
             default:
                 throw new DirectorNotFoundException(String.format("Attempt to get sorted films with " +
                         "unknown parameter = %s", sortParameter));
         }
+        sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
+        sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+        sortedFilms.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
         return sortedFilms;
-    }
-
-    private void validateFilm(int filmId) {
-        if (!filmStorage.doesFilmExist(filmId))
-            throw new FilmNotFoundException(String.format("Film with id=%s not found", filmId));
-    }
-
-    private void validateLike(int filmId, int userId) {
-        if (!filmStorage.doesLikeExist(filmId, userId))
-            throw new LikeNotFoundException(String.format("Film with id=%s was not liked by a user with id=%s",
-                    filmId, userId));
-    }
-
-    public void deleteFilmById(int filmId) {
-        validateFilm(filmId);
-        filmStorage.deleteFilmById(filmId);
-        log.debug(String.format("the film with id=%s was deleted", filmId));
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
@@ -192,7 +178,6 @@ public class FilmService {
             }
             return searchList;
         }
-
         return filmStorage.getMostPopularFilms(100);
     }
 
@@ -227,6 +212,17 @@ public class FilmService {
         List<Film> foGenre = filmStorage.getPopularFilmFoGenre(genreId, count);
         foGenre.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
         return filmStorage.getPopularFilmFoGenre(genreId, count);
+    }
+
+    private void validateFilm(int filmId) {
+        if (!filmStorage.doesFilmExist(filmId))
+            throw new FilmNotFoundException(String.format("Film with id=%s not found", filmId));
+    }
+
+    private void validateLike(int filmId, int userId) {
+        if (!filmStorage.doesLikeExist(filmId, userId))
+            throw new LikeNotFoundException(String.format("Film with id=%s was not liked by a user with id=%s",
+                    filmId, userId));
     }
 
     private void validateGenre(int genreId) {

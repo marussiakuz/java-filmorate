@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.InvalidDataException;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.List;
@@ -46,7 +45,7 @@ public class DirectorService {
         return director;
     }
 
-    public List<Director> getAllDirector() {
+    public List<Director> getAllDirectors() {
         return directorStorage.getAllDirectors();
     }
 
@@ -56,7 +55,7 @@ public class DirectorService {
     }
 
     private void validate(int directorId) {
-        if (!directorStorage.doesDirectorExist(directorId))
+        if (directorStorage.doesDirectorExist(directorId))
             throw new DirectorNotFoundException(String.format("Director with id=%s not found", directorId));
         log.debug(String.format("Attempt to add/remove/update the director using missing id = %s", directorId));
     }

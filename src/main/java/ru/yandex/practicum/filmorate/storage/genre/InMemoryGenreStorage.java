@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.List;
 
 public class InMemoryGenreStorage implements GenreStorage {
+
     @Override
     public List<Genre> getAllGenres() {
         throw new UnsupportedOperationException();

@@ -40,13 +40,7 @@ public class GenreDbStorage implements GenreStorage {
         return count > 0;
     }
 
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(resultSet.getInt("genre_id"))
-                .name(resultSet.getString("name_genre"))
-                .build();
-    }
-
+    @Override
     public List<Genre> fillGenre(int filmId) {
         String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
                 "USING(genre_id)";
@@ -54,6 +48,7 @@ public class GenreDbStorage implements GenreStorage {
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
     }
 
+    @Override
     public void addGenresToTheFilm(Film film) {
         if (film.getGenres() == null || film.getGenres().isEmpty())
             return;
@@ -68,9 +63,17 @@ public class GenreDbStorage implements GenreStorage {
         film.setGenres(fillGenre(film.getId()));
     }
 
+    @Override
     public void deleteGenresByFilmId(int filmId) {
         String sqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return Genre.builder()
+                .id(resultSet.getInt("genre_id"))
+                .name(resultSet.getString("name_genre"))
+                .build();
     }
 }

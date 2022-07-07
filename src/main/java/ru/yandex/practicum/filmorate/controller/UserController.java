@@ -62,7 +62,7 @@ public class UserController extends AbstractController<User> {
 
     @DeleteMapping(value = "/{userId}")
     public void deleteUserById(@PathVariable(value = "userId") Integer userId) {
-        userService.deleteUserByIdService(userId);
+        userService.deleteUserById(userId);
     }
 
     @GetMapping(value = "/{id}/feed")

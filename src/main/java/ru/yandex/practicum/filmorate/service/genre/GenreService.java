@@ -33,8 +33,4 @@ public class GenreService {
         if (!genreStorage.doesGenreExist(id))
             throw new GenreNotFoundException(String.format("Genre with id=%s not found", id));
     }
-
-    public List<Genre> fillGenre(int filmId){
-        return genreStorage.fillGenre(filmId);
-    }
 }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.MapperToFilm;
 
 import java.sql.PreparedStatement;
@@ -71,22 +70,18 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
 
         int count = jdbcTemplate.queryForObject(sql, new Object[]{directorId}, Integer.class);
 
-        return count > 0;
+        return count <= 0;
     }
 
-    private List<Genre> getGenresByFilmId(int filmId) {
-        String sqlQuery = "SELECT * FROM genre RIGHT JOIN (SELECT genre_id FROM film_genre WHERE film_id = ?) " +
-                "USING(genre_id)";
-
-        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
-    }
-
+    @Override
     public List<Director> fillDirector(int filmId) {  // получить список режиссеров по id фильма
         String sqlQuery = "SELECT * FROM director RIGHT JOIN (SELECT director_id FROM film_director WHERE film_id = ?) " +
                 "USING(director_id)";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
     }
+
+    @Override
     public void addDirectorToTheFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty())
             return;
@@ -100,6 +95,8 @@ public class DirectorDbStorage implements DirectorStorage, MapperToFilm {
 
         film.setDirectors(fillDirector(film.getId()));
     }
+
+    @Override
     public void deleteDirectorsByFilmId(int filmId) {
         String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE film_id = ?";
 

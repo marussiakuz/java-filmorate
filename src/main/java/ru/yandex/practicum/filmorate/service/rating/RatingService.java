@@ -29,7 +29,7 @@ public class RatingService {
         return ratingStorage.getRatingById(id);
     }
 
-    public void validate(int id) {
+    private void validate(int id) {
         if (!ratingStorage.doesRatingExist(id))
             throw new RatingNotFoundException(String.format("Rating with id=%s not found", id));
     }

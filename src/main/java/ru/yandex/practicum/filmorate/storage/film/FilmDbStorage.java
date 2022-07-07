@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.MapperToFilm;
 
 import java.sql.PreparedStatement;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,9 +65,8 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     @Override
     public Optional<Film> getFilmById(int id) {
         String sqlQuery = "SELECT * FROM film INNER JOIN rating USING (rating_id) WHERE film_id = ?";
-        Film film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
 
-        return Optional.ofNullable(film);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id));
     }
 
     @Override
@@ -97,8 +95,8 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     @Override
     public List<Film> getCommonFilms(int user_id, int friend_id) {  // получить список общих с другим пользователем фильмов
         String sqlQuery = "SELECT * FROM film LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
-                "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT " +
-                "JOIN  likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
+                "GROUP BY film_id) USING (film_id) LEFT JOIN rating ON film.rating_id = rating.rating_id " +
+                "RIGHT JOIN likes AS l1 ON film.film_id=l1.film_id RIGHT JOIN likes AS l2 ON film.film_id=l2.film_id " +
                 "WHERE l1.user_id = ? AND l2.user_id = ? ORDER BY count_like DESC";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, user_id, friend_id);
@@ -124,30 +122,26 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
 
     @Override
     public List<Film> search(String query, List<String> title) {  // поиск по названию фильмов и по режиссёру
-        String format = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
-                "LEFT JOIN film_director fd on film.film_id = fd.film_id LEFT JOIN director d " +
-                "ON fd.director_id = d.director_id WHERE LOWER (name_director) LIKE '%s'", "%" + query.toLowerCase() + "%");
-        String s = String.format("SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
-                "WHERE LOWER (title) LIKE  '%s'", "%" + query.toLowerCase() + "%");
+        String sqlDirector = "SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id " +
+                "LEFT JOIN film_director fd ON film.film_id = fd.film_id LEFT JOIN director d ON fd.director_id = " +
+                "d.director_id WHERE LOWER(name_director) LIKE '%s', \"%?%\"";
+
+        String sqlTitle = "SELECT * FROM film LEFT JOIN rating r ON film.rating_id = r.rating_id WHERE LOWER (title) " +
+                "LIKE  '%s', \"%?%\"";
+
         if (title.size() == 1) {
             if (title.contains("title")) {
-                String sqlTitle = s;
-                return jdbcTemplate.query(sqlTitle, this::mapRowToFilm);
+                return jdbcTemplate.query(sqlTitle, this::mapRowToFilm, query.toLowerCase());
             }
             if (title.contains("director")) {
-                String sqlDirector = format;
-                return jdbcTemplate.query(sqlDirector, this::mapRowToFilm);
+                return jdbcTemplate.query(sqlDirector, this::mapRowToFilm, query.toLowerCase());
             }
         }
 
         if (title.size() == 2) {
             if (title.contains("title") && title.contains("director")) {
-                String sqlTitle = s;
-
-                String sqlDirector = format;
-
-                List<Film> searchAll = jdbcTemplate.query(sqlDirector, this::mapRowToFilm);
-                searchAll.addAll(jdbcTemplate.query(sqlTitle, this::mapRowToFilm));
+                List<Film> searchAll = jdbcTemplate.query(sqlDirector, this::mapRowToFilm, query.toLowerCase());
+                searchAll.addAll(jdbcTemplate.query(sqlTitle, this::mapRowToFilm, query.toLowerCase()));
                 return searchAll;
             }
         }
@@ -157,6 +151,7 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
     @Override
     public void deleteFilmById(int filmId) {
         String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+
         jdbcTemplate.update(sqlQuery, filmId);
     }
 

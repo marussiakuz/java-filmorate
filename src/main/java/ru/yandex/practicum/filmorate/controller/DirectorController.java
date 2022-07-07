@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/directors")
-public class DirectorController {
+public class DirectorController extends AbstractController<Director> {
     private final DirectorService directorService;
 
     public DirectorController(DirectorService directorService) {
@@ -32,8 +32,8 @@ public class DirectorController {
     }
 
     @GetMapping
-    public List<Director> getAllDirector() {
-        return directorService.getAllDirector();
+    public List<Director> getAll() {
+        return directorService.getAllDirectors();
     }
 
     @GetMapping(value = "/{id}")

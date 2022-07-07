@@ -79,7 +79,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Integer> getBestMuchUserIds(int userId) {
+    public List<Integer> getBestMatchesUserIds(int userId) {
         throw new UnsupportedOperationException();
     }
 }

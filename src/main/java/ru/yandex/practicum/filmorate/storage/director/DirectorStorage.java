@@ -12,7 +12,7 @@ public interface DirectorStorage {
     Director getDirectorById(int id);
     void delete(int id);
     void update(Director director);
-    boolean doesDirectorExist(int id);
+    boolean doesDirectorExist(int directorId);
     List<Director> fillDirector(int filmId);
     void addDirectorToTheFilm(Film film);
     void deleteDirectorsByFilmId(int filmId);

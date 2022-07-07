@@ -60,33 +60,25 @@ public class ReviewsDbStorage implements ReviewsStorage {  // класс для 
         String sqlQuery = "SELECT * FROM review LEFT JOIN (SELECT review_id, SUM(like_dislike) AS usefulness " +
                 "FROM review_usefulness GROUP BY review_id) USING (review_id) WHERE review.review_id = ?";
 
-        Review review = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToReview, id);
-
-        return Optional.ofNullable(review);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToReview, id));
     }
 
     @Override
     public List<Review> getAllReviews(int count) {
-        String sqlQuery = "SELECT review.review_id, review_content, is_positive, user_id, film_id, " +
-                "COALESCE(useful.usefulness, 0) AS usefulness FROM review LEFT JOIN (SELECT review_id, " +
-                "SUM(like_dislike) AS usefulness FROM review_usefulness GROUP BY review_id) AS useful USING (review_id) " +
+        String sqlQuery = "SELECT *, COALESCE(count_useful, 0) AS usefulness FROM review LEFT JOIN (SELECT review_id, " +
+                "SUM(like_dislike) AS count_useful FROM review_usefulness GROUP BY review_id) AS useful USING (review_id) " +
                 "ORDER BY usefulness DESC limit ?";
 
-        List<Review> allReviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
-
-        return allReviews;
+        return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
     }
 
     @Override
     public List<Review> getReviewsByFilmId(int id, int count) {  // получить список отзывов по конкретному фильму
-        String sqlQuery = "SELECT review.review_id, review_content, is_positive, user_id, film_id, " +
-                "COALESCE(useful.usefulness, 0) AS usefulness FROM review LEFT JOIN (SELECT review_id, " +
-                "SUM(like_dislike) AS usefulness FROM review_usefulness GROUP BY review_id) AS useful USING (review_id) " +
+        String sqlQuery = "SELECT *, COALESCE(count_useful, 0) AS usefulness FROM review LEFT JOIN (SELECT review_id, " +
+                "SUM(like_dislike) AS count_useful FROM review_usefulness GROUP BY review_id) AS useful USING (review_id) " +
                 "WHERE film_id = ? ORDER BY usefulness DESC limit ?";
 
-        List<Review> theFilmReviews = jdbcTemplate.query(sqlQuery, this::mapRowToReview, id, count);
-
-        return theFilmReviews;
+        return jdbcTemplate.query(sqlQuery, this::mapRowToReview, id, count);
     }
 
     @Override
