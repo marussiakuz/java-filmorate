@@ -77,4 +77,9 @@ public class InMemoryUserStorage implements UserStorage {
     public void deleteUserById(int userId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public List<Integer> getBestMuchUserIds(int userId) {
+        throw new UnsupportedOperationException();
+    }
 }
