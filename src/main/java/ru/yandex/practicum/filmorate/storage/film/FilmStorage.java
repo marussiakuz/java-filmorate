@@ -24,5 +24,5 @@ public interface FilmStorage {    // управление списком фил�
     List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count);
     List<Film> getPopularFilmFoYear(int year, int count);
     List<Film> getPopularFilmFoGenre(int genreId, int count);
-    List<Film> getRecommendations(int userId);
+    List<Film> getRecommendations(int userId, int bestMuchUserId);
 }

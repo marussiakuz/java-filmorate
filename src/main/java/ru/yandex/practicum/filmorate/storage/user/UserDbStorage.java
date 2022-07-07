@@ -126,4 +126,13 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "DELETE FROM users WHERE user_id = ?";
         jdbcTemplate.update(sqlQuery, userId);
     }
+
+    @Override
+    public List<Integer> getBestMuchUserIds(int userId) {
+        String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
+                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
+                "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
+
+        return jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
+    }
 }

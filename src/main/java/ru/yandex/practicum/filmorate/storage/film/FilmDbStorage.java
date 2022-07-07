@@ -195,22 +195,13 @@ public class FilmDbStorage implements FilmStorage, MapperToFilm {
 
     // Возвращает рекомендации по фильмам для просмотра
     @Override
-    public List<Film> getRecommendations(int userId) {
-        String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
-                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
-                "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
+    public List<Film> getRecommendations(int userId, int bestMuchUserId) {
 
-        List<Integer> bestUsersId = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
-
-        if (bestUsersId.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        sqlQuery = "SELECT * FROM film LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT JOIN " +
+     String  sqlQuery = "SELECT * FROM film LEFT JOIN rating ON film.rating_id = rating.rating_id RIGHT JOIN " +
                 "(SELECT film_id FROM(SELECT film_id FROM likes WHERE USER_ID = ? EXCEPT SELECT film_id FROM likes " +
                 "WHERE USER_ID = ?)) AS r ON r.film_id = film.film_id";
 
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestUsersId.get(0), userId);
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, bestMuchUserId, userId);
     }
 
     @Override
