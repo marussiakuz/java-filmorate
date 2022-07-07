@@ -77,7 +77,7 @@ public class ReviewService {
 
         Review review = getById(id);
         eventStorage.addRemoveEvent(review.getUserId(), id, EventType.REVIEW);
-        log.debug(String.format("the remove review event was completed successfully"));
+        log.debug("the remove review event was completed successfully");
 
         reviewsStorage.delete(id);
         log.debug(String.format("review with id=%s has been successfully deleted", id));
@@ -93,11 +93,9 @@ public class ReviewService {
         return optionalReview.get();
     }
 
-    public List<Review> getAllReviews(int count) {
-        return reviewsStorage.getAllReviews(count);
-    }
+    public List<Review> getReviews(Integer filmId, Integer count) {
+        if (filmId == null) return reviewsStorage.getAllReviews(count);
 
-    public List<Review> getReviewsByFilmId(int filmId, int count) {
         validateFilm(filmId);
         return reviewsStorage.getReviewsByFilmId(filmId, count);
     }
