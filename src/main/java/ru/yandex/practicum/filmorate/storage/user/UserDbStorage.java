@@ -88,7 +88,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getCommonFriends(int userId, int otherUserId) {
         String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friendship WHERE user_id = ? " +
-                "OR user_id = ? GROUP BY friend_id HAVING count(friend_id) = 2)";
+                "OR user_id = ? GROUP BY friend_id HAVING COUNT(friend_id) = 2)";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId, otherUserId);
     }
@@ -114,6 +114,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteUserById(int userId) {
         String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+
         jdbcTemplate.update(sqlQuery, userId);
     }
 

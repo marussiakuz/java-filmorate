@@ -26,6 +26,7 @@ public class RatingService {
 
     public Rating getRatingById(int id) {
         validate(id);
+
         return ratingStorage.getRatingById(id);
     }
 

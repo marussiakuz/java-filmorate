@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.UserAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.UserNotFoundException;
@@ -71,11 +72,13 @@ public class UserService {
         if (optionalUser.isEmpty()) {
             throw new UserNotFoundException(String.format("User with id=%s not found", userId));
         }
+
         return optionalUser.get();
     }
 
     public void deleteUserById(int userId) {
         validate(userId);
+
         userStorage.deleteUserById(userId);
         log.debug(String.format("the user with id=%s was deleted", userId));
     }
@@ -84,15 +87,16 @@ public class UserService {
         if(userStorage.getBestMatchesUserIds(userId).isEmpty()){
             return new ArrayList<>();
         }
-        int bestMuchUserId = userStorage.getBestMatchesUserIds(userId).get(0);
-        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId, bestMuchUserId);
+
+        int bestMatchesUserIds = userStorage.getBestMatchesUserIds(userId).get(0);
+
+        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId, bestMatchesUserIds);
         if (!recommendationsFilms.isEmpty()) {
-            for (Film f : recommendationsFilms) {
-                if (!genreStorage.fillGenre(f.getId()).isEmpty()) {
-                    f.setGenres(genreStorage.fillGenre(f.getId()));
-                }
-            }
+            recommendationsFilms.stream()
+                    .filter(film -> !genreStorage.fillGenre(film.getId()).isEmpty())
+                    .forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
         }
+
         return recommendationsFilms;
     }
 
@@ -119,6 +123,7 @@ public class UserService {
 
     public List<User> getAllFriends(int userId) {
         validate(userId);
+
         return userStorage.getAllFriends(userId);
     }
 

@@ -40,7 +40,6 @@ public class ReviewService {
     public Review addReview(Review review) {
         validateUser(review.getUserId());
         validateFilm(review.getFilmId());
-
         if (review.getId() != null && reviewsStorage.doesReviewExist(review.getId()))
             throw new ReviewAlreadyExistsException(String.format("Review with id=%s already exists", review.getId()));
 
@@ -116,11 +115,13 @@ public class ReviewService {
 
     public void deleteLike(int reviewId, int userId) {
         validateLike(reviewId, userId);
+
         reviewsStorage.deleteLike(reviewId, userId);
     }
 
     public void deleteDislike(int reviewId, int userId) {
         validateDislike(reviewId, userId);
+
         reviewsStorage.deleteDislike(reviewId, userId);
     }
 

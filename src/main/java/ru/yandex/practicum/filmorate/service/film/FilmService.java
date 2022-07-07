@@ -51,10 +51,12 @@ public class FilmService {
     }
 
     public List<Film> getAllFilms() {
-        List<Film> all = filmStorage.getAllFilms();
-        all.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-        all.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
-        return all;
+        List<Film> films = filmStorage.getAllFilms();
+
+        fillFilmsWithGenres(films);
+        fillFilmsWithDirectors(films);
+
+        return films;
     }
 
     public Film add(Film film) {
@@ -84,6 +86,7 @@ public class FilmService {
 
     public void deleteFilmById(int filmId) {
         validateFilm(filmId);
+
         filmStorage.deleteFilmById(filmId);
         log.debug(String.format("the film with id=%s was deleted", filmId));
     }
@@ -149,9 +152,11 @@ public class FilmService {
                 throw new DirectorNotFoundException(String.format("Attempt to get sorted films with " +
                         "unknown parameter = %s", sortParameter));
         }
-        sortedFilms.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
-        sortedFilms.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+
+        fillFilmsWithDirectors(sortedFilms);
+        fillFilmsWithGenres(sortedFilms);
         sortedFilms.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
+
         return sortedFilms;
     }
 
@@ -171,15 +176,14 @@ public class FilmService {
     public List<Film> search(String query, List<String> title) {
         if (query != null && title != null) {
             List<Film> searchList = filmStorage.search(query, title);
-            searchList.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-            searchList.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
-            for (Film film : searchList) {
-                if (film.getGenres().size() == 0) {
-                    film.setGenres(null);
-                }
-            }
+
+            fillFilmsWithGenres(searchList);
+            fillFilmsWithDirectors(searchList);
+            searchList.stream().filter(film -> film.getGenres().size() == 0).forEach(film -> film.setGenres(null));
+
             return searchList;
         }
+
         return filmStorage.getMostPopularFilms(100);
     }
 
@@ -188,31 +192,39 @@ public class FilmService {
             return genreId != null && year != null ? getPopularFilmFoYearFoGenre(year, genreId, count) : genreId != null ?
                     getPopularFilmFoGenre(genreId, count) : getPopularFilmFoYear(year, count);
         }
+
         List<Film> popular = filmStorage.getMostPopularFilms(count);
-        popular.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
-        popular.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
+        fillFilmsWithGenres(popular);
+        fillFilmsWithDirectors(popular);
+
         return popular;
     }
 
     private List<Film> getPopularFilmFoYearFoGenre(int year, int genreId, int count) {
         validateYear(year);
         validateGenre(genreId);
+
         List<Film> foYearFoGenre = filmStorage.getPopularFilmFoYearFoGenre(year, genreId, count);
-        foYearFoGenre.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+        fillFilmsWithGenres(foYearFoGenre);
+
         return foYearFoGenre;
     }
 
     private List<Film> getPopularFilmFoYear(int year, int count) {
         validateYear(year);
+
         List<Film> foYear = filmStorage.getPopularFilmFoYear(year, count);
-        foYear.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+        fillFilmsWithGenres(foYear);
+
         return filmStorage.getPopularFilmFoYear(year, count);
     }
 
     private List<Film> getPopularFilmFoGenre(int genreId, int count) {
         validateGenre(genreId);
+
         List<Film> foGenre = filmStorage.getPopularFilmFoGenre(genreId, count);
-        foGenre.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+        fillFilmsWithGenres(foGenre);
+
         return filmStorage.getPopularFilmFoGenre(genreId, count);
     }
 
@@ -237,6 +249,7 @@ public class FilmService {
             throw new InvalidDataException(year < 0 ? "negative param" : "Release date may not be earlier than " +
                     "28.12.1895");
     }
+
     private void updateDirectorsAndGenres(Film film) {
         directorStorage.deleteDirectorsByFilmId(film.getId());
 
@@ -247,5 +260,13 @@ public class FilmService {
             genreStorage.deleteGenresByFilmId(film.getId());
             genreStorage.addGenresToTheFilm(film);
         }
+    }
+
+    private void fillFilmsWithGenres(List<Film> films) {
+        films.forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+    }
+
+    private void fillFilmsWithDirectors(List<Film> films) {
+        films.forEach(film -> film.setDirectors(directorStorage.fillDirector(film.getId())));
     }
 }

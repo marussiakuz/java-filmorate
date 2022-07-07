@@ -32,6 +32,7 @@ public class DirectorService {
 
     public void delete(Integer directorId) {
         validate(directorId);
+
         directorStorage.delete(directorId);
         log.debug(String.format("The director with id=%s has been deleted", directorId));
     }
