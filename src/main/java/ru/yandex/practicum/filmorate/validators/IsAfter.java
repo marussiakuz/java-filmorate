@@ -15,7 +15,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface IsAfter {    // интерфейс аннотация для проверки даты
     String message() default "The date is incorrect";
+
     String current();
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

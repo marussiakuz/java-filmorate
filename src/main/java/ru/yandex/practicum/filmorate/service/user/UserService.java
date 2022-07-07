@@ -1,14 +1,23 @@
 package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FriendNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+
+import ru.yandex.practicum.filmorate.exceptions.entityAlreadyExcistsExceptions.UserAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.FriendNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,9 +25,19 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
+    private final FilmStorage filmStorage;
+    private final GenreStorage genreStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    @Autowired
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("eventDbStorage") EventStorage eventStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
+        this.filmStorage = filmStorage;
+        this.genreStorage = genreStorage;
     }
 
     public List<User> getAllUsers() {
@@ -27,7 +46,7 @@ public class UserService {
 
     public User add(User user) {
         if (user.getId() != null && userStorage.doesUserExist(user.getId()))
-            throw new UserAlreadyExistException(String.format("User with id=%s already exists", user.getId()));
+            throw new UserAlreadyExistsException(String.format("User with id=%s already exists", user.getId()));
         checkName(user);
 
         userStorage.add(user);
@@ -45,6 +64,7 @@ public class UserService {
 
         return user;
     }
+
     public User getUserById(int userId) {
         validate(userId);
 
@@ -56,12 +76,39 @@ public class UserService {
         return optionalUser.get();
     }
 
+    public void deleteUserById(int userId) {
+        validate(userId);
+
+        userStorage.deleteUserById(userId);
+        log.debug(String.format("the user with id=%s was deleted", userId));
+    }
+
+    public List<Film> getRecommendations(int userId) {
+        if(userStorage.getBestMatchesUserIds(userId).isEmpty()){
+            return new ArrayList<>();
+        }
+
+        int bestMatchesUserIds = userStorage.getBestMatchesUserIds(userId).get(0);
+
+        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId, bestMatchesUserIds);
+        if (!recommendationsFilms.isEmpty()) {
+            recommendationsFilms.stream()
+                    .filter(film -> !genreStorage.fillGenre(film.getId()).isEmpty())
+                    .forEach(film -> film.setGenres(genreStorage.fillGenre(film.getId())));
+        }
+
+        return recommendationsFilms;
+    }
+
     public void addFriend(int userId, int friendId) {
         validate(userId);
         validate(friendId);
 
         userStorage.addFriend(userId, friendId);
         log.debug(String.format("The user with id=%s has added the user with id=%s to friends", userId, friendId));
+
+        eventStorage.addAddEvent(userId, friendId, EventType.FRIEND);
+        log.debug("the add friend event was completed successfully");
     }
 
     public void deleteFriend(int userId, int friendId) {
@@ -69,17 +116,28 @@ public class UserService {
 
         userStorage.deleteFriend(userId, friendId);
         log.debug(String.format("The user with id=%s has removed the user with id=%s from friends", userId, friendId));
+
+        eventStorage.addRemoveEvent(userId, friendId, EventType.FRIEND);
+        log.debug("the remove friend event was completed successfully");
     }
 
     public List<User> getAllFriends(int userId) {
         validate(userId);
+
         return userStorage.getAllFriends(userId);
     }
 
     public List<User> getCommonFriends(int userId, int otherUserId) {
         validate(userId);
         validate(otherUserId);
+
         return userStorage.getCommonFriends(userId, otherUserId);
+    }
+
+    public List<Event> getEvents(int userId) {
+        validate(userId);
+
+        return eventStorage.getEvents(userId);
     }
 
     private void validate(int userId) {
@@ -88,7 +146,8 @@ public class UserService {
     }
 
     private void checkName(User user) {    // проверяет -> name == null и пустое ли, и если да присваивает логин
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank())
+            user.setName(user.getLogin());
     }
 
     private void validateFriendship(int userId, int friendId) {

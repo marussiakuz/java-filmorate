@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exceptions;
+package ru.yandex.practicum.filmorate.exceptions.entityNotFoundExceptions;
 
 public class FilmNotFoundException extends RuntimeException {
 

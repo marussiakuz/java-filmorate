@@ -15,7 +15,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface DoesNotContain {    // класс для проверки на отсутствие содержания в строке подстроки
     String message() default "Login may not contain a space";
+
     String value();
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }
