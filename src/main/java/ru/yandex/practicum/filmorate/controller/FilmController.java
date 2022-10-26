@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
-
-import java.util.List;
-
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -28,8 +28,8 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {    // обновляет данные фильма в ответ на PUT запрос
-        return filmService.update(film);
+    public Film update(@Valid @RequestBody Film film) {
+        return filmService.update(film);  // обновляет данные фильма в ответ на PUT запрос
     }
 
     @GetMapping(value = "/{id}")
@@ -48,7 +48,31 @@ public class FilmController extends AbstractController<Film> {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        return filmService.getMostPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = "10") int count,
+                                      @RequestParam(value = "genreId", required = false) Integer genreId,
+                                      @RequestParam(value = "year", required = false) Integer year) {
+        return filmService.getMostPopularFilms(year, genreId, count);
+    }
+
+    @DeleteMapping(value = "/{filmId}")
+    public void deleteFilmById(@PathVariable(value = "filmId") Integer filmId) {
+        filmService.deleteFilmById(filmId);
+    }
+
+    @GetMapping(value = "/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping(value = "/search")
+    public List<Film> search(@RequestParam(value = "query", required = false) String query,
+                             @RequestParam(value = "by", required = false) List<String> title) {
+        return filmService.search(query, title);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilmsByYearOrDirector(@PathVariable Integer directorId,
+                                                     @RequestParam Optional<String> sortBy) {
+        return filmService.getSortedFilmsByDirectorId(directorId, sortBy);
     }
 }

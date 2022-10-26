@@ -88,7 +88,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getCommonFriends(int userId, int otherUserId) {
         String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friendship WHERE user_id = ? " +
-                "OR user_id = ? GROUP BY friend_id HAVING count(friend_id) = 2)";
+                "OR user_id = ? GROUP BY friend_id HAVING COUNT(friend_id) = 2)";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId, otherUserId);
     }
@@ -97,7 +97,7 @@ public class UserDbStorage implements UserStorage {
     public boolean doesUserExist(int userId) {
         String sql = "SELECT COUNT(*) FROM users WHERE user_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId}, Integer.class);
 
         return count > 0;
     }
@@ -106,12 +106,29 @@ public class UserDbStorage implements UserStorage {
     public boolean doesFriendExist(int userId, int friendId) {
         String sql = "SELECT COUNT(*) FROM friendship WHERE user_id = ? AND friend_id = ?";
 
-        int count = jdbcTemplate.queryForObject(sql, new Object[] { userId, friendId }, Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{userId, friendId}, Integer.class);
 
         return count > 0;
     }
 
-    private User mapRowToUser (ResultSet resultSet, int rowNum) throws SQLException {
+    @Override
+    public void deleteUserById(int userId) {
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+
+        jdbcTemplate.update(sqlQuery, userId);
+    }
+
+    // возвращает лист пользователей с лучшими совпадениями по понравившимся фильмам
+    @Override
+    public List<Integer> getBestMatchesUserIds(int userId) {
+        String sqlQuery = "SELECT l2.user_Id FROM likes AS l1 JOIN likes AS l2 ON l1.FILM_ID = l2.FILM_ID " +
+                "WHERE l1.user_Id = ? AND l1.user_Id<>l2.user_Id GROUP BY l1.user_Id , l2.user_Id " +
+                "ORDER BY COUNT(l1.film_id) DESC LIMIT 1";
+
+        return jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
+    }
+
+    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
                 .id(resultSet.getInt("user_id"))
                 .name(resultSet.getString("name"))

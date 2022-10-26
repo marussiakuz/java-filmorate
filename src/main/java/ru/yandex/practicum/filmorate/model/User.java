@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.validators.DoesNotContain;
 
@@ -24,12 +23,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class User {
+    @JsonIgnore
+    private final Map<Integer, Boolean> friends = new HashMap<>();
 
     private Integer id;
     private String name;
-
-    @JsonIgnore
-    private final Map<Integer, Boolean> friends = new HashMap<>();
 
     @NotNull(message = "Email may not be null")
     @NotBlank(message = "Email may not be blank")

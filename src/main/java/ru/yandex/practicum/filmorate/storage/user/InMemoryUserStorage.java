@@ -18,7 +18,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void add(User user) {
         if (user.getId() == null || user.getId() == 0) {
-            if (users.isEmpty()) user.setId(1);
+            if (users.isEmpty())
+                user.setId(1);
             else {
                 int maxId = users.keySet().stream().max(Comparator.naturalOrder()).get();
                 user.setId(++maxId);
@@ -70,5 +71,15 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public boolean doesFriendExist(int userId, int friendId) {
         return users.get(userId).getFriends().contains(friendId);
+    }
+
+    @Override
+    public void deleteUserById(int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Integer> getBestMatchesUserIds(int userId) {
+        throw new UnsupportedOperationException();
     }
 }
