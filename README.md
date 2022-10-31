@@ -29,7 +29,7 @@ As part of the group project, the main functionality was expanded with additiona
 
 
 
-## <h1> Database diagrams </h1>>
+## <h1> Database diagrams </h1>
 
 
 ![схемы базы данных](https://github.com/marussiakuz/java-filmorate/blob/develop/DATABASE%20schema.png?raw=true)
